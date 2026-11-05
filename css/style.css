@@ -346,12 +346,12 @@ main { min-height: 50vh; }
 .cs-table thead tr:first-child th { top: 0; }
 .cs-table thead tr.meas-row th { top: 31px; border-bottom: 1px solid #b7bdc6; white-space: normal; min-width: 84px; vertical-align: bottom; }
 .cs-table thead tr:only-child th { top: 0; border-bottom: 1px solid #b7bdc6; }
-.cs-table .idx { color: #7a818c; background: #f4f5f7; text-align: center; font-weight: 500; }
+.cs-table .idx { width: 1%; min-width: 34px; color: #7a818c; background: #f4f5f7; text-align: center; font-weight: 500; }
 .cs-table thead .idx { background: #eceff3; }
 .cs-table td.name { text-align: left; }
 .cs-table td.name .dot { margin-right: 6px; }
 .cs-table tr.blank td { height: 26px; }
-.run-row th { padding: 3px 6px; }
+.run-row th { height: 31px; padding: 0 6px; }
 .run-sel { border: 0; background: transparent; font-weight: 700; font-size: 12.5px; max-width: 120px; color: #1f2329; cursor: pointer; }
 .run-row .dot { margin-right: 4px; }
 .more-btn { display: block; width: 100%; padding: 10px; border: 0; border-top: 1px solid #e3e6eb; background: #f7f8fa; color: #1f5fd1; font-weight: 600; cursor: pointer; }
