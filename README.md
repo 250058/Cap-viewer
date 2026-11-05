@@ -207,5 +207,6 @@ node tools/render-icons.mjs
 
 ## 라이선스
 
-- 이 저장소의 라이선스는 아직 정하지 않았습니다. 다른 사람이 자유롭게 쓰고 고치게 하려면 `LICENSE` 파일(예: MIT)을 추가하세요.
-- 함께 들어 있는 [html2canvas](https://github.com/niklasvh/html2canvas) 1.4.1은 MIT 라이선스입니다 (`vendor/html2canvas.LICENSE`).
+[MIT 라이선스](LICENSE)로 배포합니다. 저작권 표시와 라이선스 문구만 남기면 누구나 자유롭게 쓰고, 고치고, 다시 배포할 수 있습니다 (학교·수업·상업적 이용 포함). 보증은 없습니다.
+
+함께 들어 있는 [html2canvas](https://github.com/niklasvh/html2canvas) 1.4.1도 MIT 라이선스입니다 (`vendor/html2canvas.LICENSE`).
