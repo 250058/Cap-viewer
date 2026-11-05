@@ -29,19 +29,39 @@
     tableRunId: null,
   };
 
-  // ---------- overlays & history (Android back button closes the top overlay) ----------
+  // ---------- history ----------
+  // Opening a file adds "#파일이름" to the address, so the back button returns to the start
+  // screen (and forward goes back to the file). Open panels (data summary, full-screen graph,
+  // pictures, PDF, run picker) also get a history entry, so back closes them first.
   const overlays = [];
+  let fileSeq = 0;
+  const currentFile = () => (history.state && history.state.capFile) || 0;
   function openOverlay(close) {
     overlays.push(close);
-    history.pushState({ capOverlay: overlays.length }, '');
+    history.pushState({ capOverlay: overlays.length, capFile: currentFile() }, '');
   }
   function closeOverlay() {
     if (overlays.length) history.back();
   }
-  window.addEventListener('popstate', () => {
+  window.addEventListener('popstate', (e) => {
     const f = overlays.pop();
-    if (f) f();
+    if (f) { f(); return; }
+    const id = e.state && e.state.capFile;
+    if (id && state.cap && id === state.fileKey) {
+      if ($('#viewer').hidden) showFileScreen();
+    } else {
+      if (id) history.replaceState(null, '', location.pathname + location.search); // that file is no longer open
+      showStartScreen();
+    }
   });
+  function pushFileRoute() {
+    state.fileKey = ++fileSeq;
+    const st = { capFile: state.fileKey };
+    const url = location.pathname + location.search + '#' + encodeURIComponent(baseName());
+    // a file opened from a file screen replaces it, so back always leads to the start screen
+    if (currentFile()) history.replaceState(st, '', url);
+    else history.pushState(st, '', url);
+  }
 
   let toastTimer = 0;
   function toast(msg) {
@@ -554,6 +574,28 @@
     }
   }
 
+  // ---------- screens ----------
+  function setHeader(cap) {
+    $('#pdf-btn').hidden = !cap;
+    $('#doc-title').textContent = cap ? cap.fileName || 'Capstone 파일' : 'CAP 뷰어';
+    $('#doc-sub').textContent = cap
+      ? cap.pages.length + '개 페이지 · ' + (cap.runs.length ? cap.runs.length + '개 런' : '측정 데이터 없음')
+      : 'PASCO Capstone 파일 보기';
+    if (!cap) document.title = 'CAP 뷰어';
+  }
+  function showStartScreen() {
+    destroyWidgets();
+    $('#error-box').hidden = true;
+    setHeader(null);
+    showView('welcome');
+    window.scrollTo(0, 0);
+  }
+  function showFileScreen() {
+    setHeader(state.cap);
+    showView('viewer');
+    renderPage();
+  }
+
   // ---------- loading ----------
   function showView(which) {
     $('#welcome').hidden = which !== 'welcome';
@@ -623,11 +665,8 @@
     state.table = null;
     state.tableRunId = null;
     pdfJob.blob = null;
-    $('#pdf-btn').hidden = false;
-    $('#doc-title').textContent = cap.fileName || 'Capstone 파일';
-    $('#doc-sub').textContent = cap.pages.length + '개 페이지 · ' + (cap.runs.length ? cap.runs.length + '개 런' : '측정 데이터 없음');
-    showView('viewer');
-    renderPage();
+    pushFileRoute();
+    showFileScreen();
     if (cap.warnings.length) toast('일부 내용을 읽지 못했습니다. 데이터 요약에서 확인하세요.');
   }
 
@@ -816,6 +855,8 @@
     navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW 등록 실패', e));
   }
 
+  // A reload keeps "#파일이름" in the address, but the file itself is not kept: start fresh.
+  if (location.hash || currentFile()) history.replaceState(null, '', location.pathname + location.search);
   checkSharedFile();
 
   // for tests / debugging

@@ -128,6 +128,20 @@ try {
       await page.click('#pdf-close');
       await page.waitForTimeout(200);
 
+      // address "#파일이름": back returns to the start screen, forward to the file
+      check(decodeURIComponent(new URL(page.url()).hash) === '#demo', 'address shows #파일이름 (' + decodeURIComponent(new URL(page.url()).hash) + ')');
+      await page.click('#summary-btn');
+      await page.goBack();
+      await page.waitForTimeout(200);
+      check(await page.locator('#drawer').isHidden() && await page.locator('#viewer').isVisible(), 'back closes an open panel first');
+      await page.goBack();
+      await page.waitForTimeout(200);
+      check(await page.locator('#welcome').isVisible() && new URL(page.url()).hash === '', 'back returns to the start screen');
+      check((await page.locator('#doc-title').innerText()) === 'CAP 뷰어' && await page.locator('#pdf-btn').isHidden(), 'start screen header restored');
+      await page.goForward();
+      await page.waitForTimeout(300);
+      check(await page.locator('#viewer').isVisible() && (await page.locator('.paper .disp').count()) > 0, 'forward returns to the file');
+
       // sanitizer: hostile HTML must not run or keep handlers
       const xss = await page.evaluate(() => {
         const html = '<p onclick="window.__p=1">a<img src=x onerror="window.__p=2"><script>window.__p=3<\/script>' +
