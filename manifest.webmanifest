@@ -1,19 +1,45 @@
 {
-  "name": "CAP 뷰어 - Capstone 파일 보기",
+  "name": "CAP 뷰어 — Capstone 파일 보기",
   "short_name": "CAP 뷰어",
-  "description": "PASCO Capstone(.cap) 실험 파일을 휴대폰에서 그래프와 표로 보는 앱",
+  "description": "PASCO Capstone(.cap) 실험 파일의 페이지, 설명문, 그래프, 표를 휴대폰에서 보고 PDF로 저장하는 앱. 파일은 기기 안에서만 처리됩니다.",
   "lang": "ko",
   "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f6f9",
-  "theme_color": "#1d4ed8",
+  "theme_color": "#1f5fd1",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-monochrome-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "monochrome"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ],
   "share_target": {
     "action": "./share-target",
@@ -21,14 +47,61 @@
     "enctype": "multipart/form-data",
     "params": {
       "files": [
-        { "name": "file", "accept": ["*/*", ".cap", "application/octet-stream", "application/zip"] }
+        {
+          "name": "file",
+          "accept": [
+            "*/*",
+            ".cap",
+            "application/octet-stream",
+            "application/zip"
+          ]
+        }
       ]
     }
   },
   "file_handlers": [
     {
       "action": "./",
-      "accept": { "application/x-pasco-capstone": [".cap"] }
+      "accept": {
+        "application/x-pasco-capstone": [
+          ".cap"
+        ]
+      }
+    }
+  ],
+  "categories": [
+    "education",
+    "utilities",
+    "productivity"
+  ],
+  "screenshots": [
+    {
+      "src": "docs/screenshots/phone-page.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Capstone 페이지를 휴대폰 화면에 맞게 보기"
+    },
+    {
+      "src": "docs/screenshots/phone-graph.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "그래프 구간 선택과 2차 맞춤"
+    },
+    {
+      "src": "docs/screenshots/phone-pdf.png",
+      "sizes": "780x1688",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "모든 페이지를 PDF로 저장"
+    },
+    {
+      "src": "docs/screenshots/desktop-layout.png",
+      "sizes": "1280x760",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Capstone 원본 배치 그대로 보기"
     }
   ]
 }

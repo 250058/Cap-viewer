@@ -155,7 +155,7 @@ main { min-height: 50vh; }
   border-radius: 12px;
   box-shadow: var(--shadow);
 }
-.drop-icon { width: 60px; height: 60px; color: var(--accent); }
+.drop-icon { width: 84px; height: 84px; border-radius: 19px; box-shadow: 0 8px 20px rgba(23, 57, 168, .28); }
 .drop-card h2 { margin: 2px 0 0; font-size: 19px; }
 .drop-card p { margin: 0; color: var(--muted); max-width: 32em; }
 .drop-card .btn.big { margin-top: 8px; }

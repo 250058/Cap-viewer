@@ -1,5 +1,5 @@
 /* Service worker: offline app shell + receives files shared to the installed app. */
-const VERSION = 'cap-viewer-v3';
+const VERSION = 'cap-viewer-v4';
 const SHELL = [
   './',
   './index.html',
@@ -15,6 +15,8 @@ const SHELL = [
   './js/app.js',
   './manifest.webmanifest',
   './icons/icon.svg',
+  './icons/favicon.svg',
+  './icons/favicon-32.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',

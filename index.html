@@ -12,9 +12,18 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="CAP 뷰어">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <!-- link previews (KakaoTalk, messengers, SNS). og:image needs an absolute URL: change it if you deploy elsewhere -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CAP 뷰어">
+  <meta property="og:title" content="CAP 뷰어 — Capstone 실험 파일을 휴대폰에서 그대로">
+  <meta property="og:description" content="PASCO Capstone(.cap) 파일의 페이지, 설명문, 그래프, 표를 휴대폰에서 보고 PDF로 저장하세요. 설치 없이, 파일은 기기 안에서만 처리됩니다.">
+  <meta property="og:image" content="https://250058.github.io/Cap-viewer/icons/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -39,11 +48,7 @@
   <main id="workspace">
     <section id="welcome" class="welcome">
       <div class="drop-card">
-        <svg class="drop-icon" viewBox="0 0 64 64" aria-hidden="true">
-          <rect x="6" y="8" width="52" height="44" rx="6" fill="#fff" stroke="currentColor" stroke-width="3"/>
-          <rect x="6" y="8" width="52" height="9" rx="4" fill="currentColor" opacity=".18"/>
-          <polyline points="14,44 24,32 32,38 42,24 50,30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <img class="drop-icon" src="icons/icon.svg" alt="" width="84" height="84">
         <h2>Capstone 실험 파일을 휴대폰에서 그대로</h2>
         <p>PASCO Capstone에서 저장한 <b>.cap</b> 파일의 페이지, 설명문, 그림, 그래프, 표를 Capstone처럼 볼 수 있어요.</p>
         <label class="btn primary big" for="file-input">.cap 파일 선택</label>

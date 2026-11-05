@@ -1,19 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>CAP 뷰어</title>
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#2f6bff"/>
       <stop offset="1" stop-color="#1739a8"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#g)"/>
-  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M112 128v272h288" stroke-width="22" opacity=".55"/>
-    <path d="M140 352c40-10 62-60 92-112s56-84 90-84 52 28 66 56" stroke-width="30"/>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round">
+  <path d="M190.2 204.6A38 38 0 1 0 190.2 255.4"/>
+  <circle cx="278" cy="230" r="38"/>
+  <path d="M316 192V268"/>
+  <circle cx="398" cy="230" r="38"/>
+  <path d="M360 192V320"/>
   </g>
-  <g fill="#ffd166">
-    <circle cx="140" cy="352" r="20"/>
-    <circle cx="232" cy="240" r="20"/>
-    <circle cx="322" cy="156" r="20"/>
-    <circle cx="388" cy="212" r="20"/>
-  </g>
+  <circle cx="79" cy="265" r="15" fill="#ffd166"/>
 </svg>
