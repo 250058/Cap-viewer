@@ -1,6 +1,7 @@
 // End-to-end check in headless Chromium.
 //   node tests/e2e.mjs [path/to/file.cap ...]
-// Without arguments it opens examples/demo.cap and checks known values.
+// Without arguments it opens examples/demo.cap and checks known content and values.
+// With files it opens each one and visits every page (no errors, no warnings).
 // Requires Playwright (npm i -D playwright && npx playwright install chromium).
 import http from 'node:http';
 import fs from 'node:fs';
@@ -32,64 +33,126 @@ function check(cond, msg) {
 }
 
 const browser = await chromium.launch();
+
+async function openPage(viewport) {
+  const page = await browser.newPage({ viewport, deviceScaleFactor: 1 });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto(base);
+  return { page, errors };
+}
+
+async function load(page, file, forceJs) {
+  if (forceJs) await page.evaluate(() => { window.__capForceJsInflate = true; });
+  await page.setInputFiles('#file-input', file);
+  await page.waitForSelector('#viewer:not([hidden])', { timeout: 30000 });
+  await page.waitForTimeout(300);
+}
+
 try {
   const files = process.argv.slice(2);
-  const targets = files.length ? files : [path.join(root, 'examples/demo.cap')];
-  for (const forceJs of [false, true]) {
-    for (const file of targets) {
-      console.log(`\n${path.basename(file)} (${forceJs ? 'JS inflate' : 'native inflate'})`);
-      const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
-      const errors = [];
-      page.on('pageerror', (e) => errors.push(e.message));
-      page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-      await page.goto(base);
-      if (forceJs) await page.evaluate(() => { window.__capForceJsInflate = true; });
-      await page.setInputFiles('#file-input', file);
-      await page.waitForSelector('#viewer:not([hidden])', { timeout: 20000 });
-      const info = await page.evaluate(() => {
-        const s = window.CapViewerApp.state;
-        return {
-          runs: s.cap.runs.length,
-          meas: s.cap.measurements.map((m) => m.name + ':' + m.unit),
-          selected: s.selected.length,
-          points: s.cap.runs.map((r) => r.points),
-          warnings: s.cap.warnings,
-          yId: s.yId,
-        };
+
+  if (!files.length) {
+    const demo = path.join(root, 'examples/demo.cap');
+    for (const forceJs of [false, true]) {
+      console.log(`\ndemo.cap — phone, ${forceJs ? 'JS inflate' : 'native inflate'}`);
+      const { page, errors } = await openPage({ width: 390, height: 844 });
+      await load(page, demo, forceJs);
+
+      check((await page.locator('#page-tabs [role="tab"]').count()) === 2, 'two page tabs');
+      check((await page.locator('.disp-text').first().innerText()).includes('경사면에서 수레의 운동'), 'text box content shown');
+      check((await page.locator('.disp-entry').innerText()).includes('가속도가 커졌다'), 'answer box content shown');
+      await page.waitForFunction(() => { const i = document.querySelector('.disp-img'); return i && i.complete && i.naturalWidth > 0; }, null, { timeout: 5000 });
+      check(true, 'picture loaded from the .cap');
+
+      await page.click('#next-page');
+      await page.waitForTimeout(300);
+      check((await page.locator('#page-num').innerText()) === '2 / 2', 'next page button');
+      check((await page.locator('.disp-graph .tb span').first().innerText()) === '런 3', 'graph shows the 3 runs saved in the file');
+      check((await page.locator('.disp-table tbody tr').count()) === 28, 'table shows the 28 rows of run 3');
+      check(/\d/.test(await page.locator('.dig-value').innerText()), 'digits show a value');
+
+      const fit = await page.evaluate(() => {
+        const { state, computeStats } = window.CapViewerApp;
+        const run = state.cap.runs[2];
+        const pos = run.data.get(state.cap.measurements.find((m) => m.name === 'Position').id);
+        return computeStats(pos.t, pos.v, [0.6, 10]).quad;
       });
-      console.log('  runs:', info.runs, '| measurements:', info.meas.join(', '), '| selected:', info.selected);
-      check(info.runs > 0, 'has runs');
-      check(info.meas.length > 0, 'has measurements');
-      check(info.warnings.length === 0, 'no warnings ' + JSON.stringify(info.warnings));
-      check((await page.locator('.stat-card').count()) === info.selected, 'one stats card per selected run');
+      check(Math.abs(2 * fit.A - 2.478) < 0.05, `quadratic fit gives a ≈ 2.478 (got ${(2 * fit.A).toFixed(3)})`);
 
-      if (!files.length) {
-        // demo.cap: run 3 is a 15° ramp -> a = g sin15° - 0.06 ≈ 2.478 m/s²
-        const fit = await page.evaluate(() => {
-          const { state, computeStats } = window.CapViewerApp;
-          const run = state.cap.runs[2];
-          const pos = run.data.get(state.cap.measurements.find((m) => m.name === 'Position').id);
-          return computeStats(pos.t, pos.v, [0.6, 10]).quad;
-        });
-        check(Math.abs(2 * fit.A - 2.478) < 0.05, `quadratic fit gives a ≈ 2.478 (got ${(2 * fit.A).toFixed(3)})`);
-        check(info.selected === 3, 'graph defaults from file (3 runs shown)');
-      }
+      await page.selectOption('.disp-graph .tb-select', 'quad');
+      check((await page.locator('.fitbox').count()) === 3, 'curve fit box per run');
 
-      // interact: fit, range mode, table, info
-      await page.selectOption('#fit-select', 'quad');
-      check((await page.locator('.fit-box').count()) === info.selected, 'fit shown for each run');
-      const box = await page.locator('#chart').boundingBox();
-      await page.mouse.click(box.x + box.width * 0.5, box.y + box.height * 0.5);
-      await page.click('#tab-btn-table');
-      const rows = await page.locator('#data-table tbody tr').count();
-      check(rows > 0, `table has rows (${rows})`);
-      await page.click('#tab-btn-info');
-      check((await page.locator('#info .info-section').count()) >= 3, 'info sections rendered');
+      // y axis picker
+      await page.selectOption('.disp-graph .axis-y', { label: 'Velocity (m/s)' });
+      check((await page.locator('.fitbox').count()) === 3, 'y axis changed to velocity');
+
+      // run picker
+      await page.click('.disp-graph .tb:has-text("런")');
+      await page.locator('#run-list input').first().uncheck();
+      check((await page.locator('.disp-graph .tb span').first().innerText()) === '런 2', 'run picker removes a run');
+      await page.click('#runs-done');
+      await page.waitForTimeout(200);
+      check(await page.locator('#runs-sheet').isHidden(), 'run picker closes');
+
+      // full screen graph and back button
+      await page.click('.disp-graph [aria-label="크게 보기"]');
+      check(await page.locator('.disp-graph.expanded').isVisible(), 'graph opens full screen');
+      await page.goBack();
+      await page.waitForTimeout(200);
+      check((await page.locator('.disp-graph.expanded').count()) === 0, 'back button closes full screen');
+
+      // data summary + table
+      await page.click('#summary-btn');
+      check((await page.locator('#dpanel-summary .info-section').count()) >= 3, 'data summary rendered');
+      await page.click('#dtab-table');
+      check((await page.locator('#data-table tbody tr').count()) === 28, 'data table rows');
+      await page.click('#drawer-close');
+      await page.waitForTimeout(200);
+
+      // original layout mode
+      await page.click('#mode-btn');
+      await page.waitForTimeout(300);
+      check((await page.locator('.mode-layout .paper .disp').count()) === 4, 'original layout shows the 4 displays');
+
+      // sanitizer: hostile HTML must not run or keep handlers
+      const xss = await page.evaluate(() => {
+        const html = '<p onclick="window.__p=1">a<img src=x onerror="window.__p=2"><script>window.__p=3<\/script>' +
+          '<a href="javascript:window.__p=4">x</a><span style="background:url(http://e/x)">y</span><iframe src="http://e"></iframe></p>';
+        const elx = window.CapRichText.render(html, { mode: 'reflow', loadImage: () => Promise.resolve(null) });
+        document.body.appendChild(elx);
+        const bad = elx.querySelector('script,iframe,[onclick],[onerror],a[href^="javascript"],[style*="url"]');
+        return { bad: !!bad, pwned: window.__p };
+      });
+      await page.waitForTimeout(100);
+      check(!xss.bad && xss.pwned === undefined, 'rich text sanitizer strips scripts, handlers and unsafe URLs');
+
       check(errors.length === 0, 'no page errors ' + JSON.stringify(errors));
-      if (process.env.SHOTS) {
-        await page.click('#tab-btn-graph');
-        await page.screenshot({ path: path.join(process.env.SHOTS, path.basename(file) + (forceJs ? '-js' : '') + '.png'), fullPage: true });
+      await page.close();
+    }
+  }
+
+  for (const file of files) {
+    for (const vp of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+      console.log(`\n${path.basename(file)} — ${vp.width}px`);
+      const { page, errors } = await openPage(vp);
+      await load(page, file, false);
+      const info = await page.evaluate(() => {
+        const c = window.CapViewerApp.state.cap;
+        return { pages: c.pages.length, runs: c.runs.length, warnings: c.warnings };
+      });
+      console.log('  pages:', info.pages, '| runs/data sets:', info.runs);
+      check(info.warnings.length === 0, 'no warnings ' + JSON.stringify(info.warnings));
+      let shown = 0;
+      for (let i = 0; i < info.pages; i++) {
+        await page.evaluate((n) => window.CapViewerApp.goPage(n), i);
+        await page.waitForTimeout(150);
+        shown += await page.locator('.paper .disp').count();
       }
+      check(shown > 0, `visited ${info.pages} page(s), ${shown} displays rendered`);
+      check(errors.length === 0, 'no page errors ' + JSON.stringify(errors));
+      if (process.env.SHOTS) await page.screenshot({ path: path.join(process.env.SHOTS, path.basename(file) + '-' + vp.width + '.png') });
       await page.close();
     }
   }

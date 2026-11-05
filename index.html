@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>CAP 뷰어</title>
-  <meta name="description" content="PASCO Capstone(.cap) 실험 파일을 휴대폰에서 열어 그래프와 표로 보는 웹앱. 파일은 기기 안에서만 처리됩니다.">
-  <meta name="theme-color" content="#1d4ed8" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+  <meta name="description" content="PASCO Capstone(.cap) 실험 파일을 휴대폰에서 Capstone처럼 페이지·텍스트·그래프·표로 보는 웹앱. 파일은 기기 안에서만 처리됩니다.">
+  <meta name="theme-color" content="#e9ecf0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1d2025" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -18,34 +18,37 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="topbar">
+  <header class="appbar">
     <div class="brand">
-      <img src="icons/icon.svg" alt="" width="32" height="32">
+      <img src="icons/icon.svg" alt="" width="30" height="30">
       <div class="brand-text">
-        <h1>CAP 뷰어</h1>
-        <p id="file-name">PASCO Capstone 파일 보기</p>
+        <h1 id="doc-title">CAP 뷰어</h1>
+        <p id="doc-sub">PASCO Capstone 파일 보기</p>
       </div>
     </div>
     <label class="btn primary" for="file-input" id="open-btn">
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
-      <span>파일 열기</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
+      <span>열기</span>
     </label>
     <input type="file" id="file-input" class="visually-hidden">
   </header>
 
-  <main>
+  <nav class="page-tabs" id="page-tabs" role="tablist" aria-label="페이지" hidden></nav>
+
+  <main id="workspace">
     <section id="welcome" class="welcome">
-      <div class="drop-card" id="drop-card">
+      <div class="drop-card">
         <svg class="drop-icon" viewBox="0 0 64 64" aria-hidden="true">
-          <rect x="6" y="8" width="52" height="44" rx="8" fill="none" stroke="currentColor" stroke-width="3"/>
-          <polyline points="14,42 24,30 32,36 42,20 50,26" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="6" y="8" width="52" height="44" rx="6" fill="#fff" stroke="currentColor" stroke-width="3"/>
+          <rect x="6" y="8" width="52" height="9" rx="4" fill="currentColor" opacity=".18"/>
+          <polyline points="14,44 24,32 32,38 42,24 50,30" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h2>Capstone 실험 파일을 휴대폰에서 바로 보기</h2>
-        <p>PASCO Capstone에서 저장한 <b>.cap</b> 파일을 선택하면 그래프, 데이터 표, 통계를 볼 수 있어요.</p>
+        <h2>Capstone 실험 파일을 휴대폰에서 그대로</h2>
+        <p>PASCO Capstone에서 저장한 <b>.cap</b> 파일의 페이지, 설명문, 그림, 그래프, 표를 Capstone처럼 볼 수 있어요.</p>
         <label class="btn primary big" for="file-input">.cap 파일 선택</label>
         <button class="btn ghost" id="demo-btn" type="button">예제 파일로 체험하기</button>
         <p class="privacy">
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z"/></svg>
           파일은 이 기기 안에서만 처리되며 어디에도 업로드되지 않습니다.
         </p>
       </div>
@@ -53,10 +56,10 @@
       <div class="tips">
         <h3>사용 팁</h3>
         <ul>
-          <li>카카오톡·드라이브로 받은 파일은 먼저 휴대폰에 저장한 뒤 <b>파일 선택</b>에서 고르세요.</li>
-          <li>브라우저 메뉴의 <b>홈 화면에 추가</b>를 누르면 앱처럼 쓸 수 있고, 인터넷 없이도 열립니다.</li>
-          <li>Android에서 앱으로 설치하면 파일 앱의 <b>공유 → CAP 뷰어</b>로 바로 열 수 있어요.</li>
-          <li>센서로 측정한 값(위치, 속도, 힘, 온도 등)을 볼 수 있습니다. Capstone 계산기로 만든 계산값은 아직 지원하지 않습니다.</li>
+          <li>위쪽 <b>페이지 탭</b>으로 Capstone의 페이지를 넘겨 보고, 아래 <b>◀ ▶</b>로도 이동할 수 있어요.</li>
+          <li>휴대폰에서는 화면에 맞게 <b>세로로 정리</b>해서 보여 주고, <b>원본 배치</b>를 누르면 Capstone 화면 그대로 볼 수 있어요.</li>
+          <li>그래프의 축 이름을 누르면 측정값을 바꿀 수 있고, 두 손가락으로 확대, 탭해서 값을 읽을 수 있어요.</li>
+          <li>카카오톡·드라이브로 받은 파일은 먼저 휴대폰에 저장한 뒤 <b>파일 선택</b>에서 고르세요. 홈 화면에 추가하면 인터넷 없이도 열립니다.</li>
         </ul>
       </div>
     </section>
@@ -68,92 +71,57 @@
     </section>
 
     <section id="viewer" hidden>
-      <nav class="tabs" role="tablist" aria-label="보기 선택">
-        <button role="tab" id="tab-btn-graph" aria-controls="tab-graph" aria-selected="true">그래프</button>
-        <button role="tab" id="tab-btn-table" aria-controls="tab-table" aria-selected="false">표</button>
-        <button role="tab" id="tab-btn-info" aria-controls="tab-info" aria-selected="false">정보</button>
-      </nav>
-
-      <div id="tab-graph" class="panel" role="tabpanel" aria-labelledby="tab-btn-graph">
-        <div class="controls">
-          <label class="field"><span>세로축 (Y)</span><select id="y-select"></select></label>
-          <label class="field"><span>가로축 (X)</span><select id="x-select"></select></label>
-          <button class="field-btn" id="runs-btn" type="button">
-            <span class="field-label">런 선택</span>
-            <span class="field-value" id="runs-count">0개</span>
-          </button>
-        </div>
-
-        <div class="legend" id="legend"></div>
-
-        <div class="chart-card">
-          <canvas id="chart" aria-label="데이터 그래프"></canvas>
-          <div class="chart-empty" id="chart-empty" hidden>선택한 런에 이 측정값 데이터가 없습니다.</div>
-        </div>
-        <div class="readout" id="readout"><span class="muted">그래프를 탭하면 값을 읽을 수 있어요</span></div>
-
-        <div class="toolbar">
-          <button class="chip-btn" id="fit-all-btn" type="button">
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/></svg>
-            전체 보기
-          </button>
-          <button class="chip-btn" id="range-btn" type="button" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M3 5h2v14H3V5zm16 0h2v14h-2V5zM7 11h10v2H7v-2z"/></svg>
-            구간 선택
-          </button>
-          <button class="chip-btn" id="points-btn" type="button" aria-pressed="false">
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="6" cy="16" r="2.4" fill="currentColor"/><circle cx="12" cy="9" r="2.4" fill="currentColor"/><circle cx="18" cy="13" r="2.4" fill="currentColor"/></svg>
-            점 표시
-          </button>
-          <label class="chip-select">
-            <span class="visually-hidden">곡선 맞춤</span>
-            <select id="fit-select">
-              <option value="none">맞춤 없음</option>
-              <option value="linear">직선 맞춤</option>
-              <option value="quad">2차 맞춤</option>
-            </select>
-          </label>
-          <button class="chip-btn" id="png-btn" type="button">
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 3v10.6l3.3-3.3 1.4 1.4L11 17.4l-5.7-5.7 1.4-1.4 3.3 3.3V3h2zM4 19h14v2H4v-2z"/></svg>
-            이미지
-          </button>
-        </div>
-        <p class="hint" id="gesture-hint">한 손가락: 이동 · 두 손가락: 확대/축소 · 탭: 값 읽기 · 두 번 탭: 전체 보기</p>
-
-        <div class="stats-head">
-          <h3>통계</h3>
-          <span id="stats-scope" class="muted">전체 데이터</span>
-          <button class="link-btn" id="clear-range-btn" type="button" hidden>구간 해제</button>
-        </div>
-        <div class="stats" id="stats"></div>
-      </div>
-
-      <div id="tab-table" class="panel" role="tabpanel" aria-labelledby="tab-btn-table" hidden>
-        <div class="controls">
-          <label class="field grow"><span>런</span><select id="table-run"></select></label>
-        </div>
-        <div class="toolbar">
-          <button class="chip-btn" id="csv-run-btn" type="button">이 런 CSV 저장</button>
-          <button class="chip-btn" id="csv-all-btn" type="button">전체 런 CSV 저장</button>
-          <button class="chip-btn" id="share-btn" type="button" hidden>공유</button>
-        </div>
-        <p class="hint" id="table-summary"></p>
-        <div class="table-wrap">
-          <table id="data-table"></table>
-        </div>
-        <button class="btn ghost wide" id="more-rows-btn" type="button" hidden>더 보기</button>
-      </div>
-
-      <div id="tab-info" class="panel" role="tabpanel" aria-labelledby="tab-btn-info" hidden>
-        <div id="info"></div>
-      </div>
+      <div id="page-host" class="page-host"></div>
     </section>
   </main>
 
-  <div class="sheet-backdrop" id="runs-sheet" hidden>
+  <div class="zoom-ctl" id="zoom-ctl" hidden>
+    <button type="button" id="zoom-out" aria-label="축소"></button>
+    <button type="button" id="zoom-reset" aria-label="화면 폭에 맞추기">100%</button>
+    <button type="button" id="zoom-in" aria-label="확대"></button>
+  </div>
+
+  <footer class="controls" id="controls" hidden>
+    <button type="button" class="ctl" id="summary-btn"></button>
+    <div class="pager">
+      <button type="button" class="pg" id="prev-page" aria-label="이전 페이지"></button>
+      <div class="pg-label"><b id="page-num">1 / 1</b><span id="page-name"></span></div>
+      <button type="button" class="pg" id="next-page" aria-label="다음 페이지"></button>
+    </div>
+    <button type="button" class="ctl" id="mode-btn"></button>
+  </footer>
+
+  <div class="drawer-backdrop" id="drawer" hidden>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+      <div class="drawer-head">
+        <h2 id="drawer-title">데이터 요약</h2>
+        <button type="button" class="icon-btn" id="drawer-close" aria-label="닫기"></button>
+      </div>
+      <div class="seg" role="tablist">
+        <button type="button" role="tab" id="dtab-summary" aria-selected="true">요약</button>
+        <button type="button" role="tab" id="dtab-table" aria-selected="false">데이터 표</button>
+      </div>
+      <div class="drawer-body">
+        <div id="dpanel-summary"></div>
+        <div id="dpanel-table" hidden>
+          <label class="field"><span>런</span><select id="table-run"></select></label>
+          <div class="row-btns">
+            <button class="chip-btn" id="csv-run-btn" type="button">이 런 CSV 저장</button>
+            <button class="chip-btn" id="csv-all-btn" type="button">전체 런 CSV 저장</button>
+            <button class="chip-btn" id="share-btn" type="button" hidden>공유</button>
+          </div>
+          <p class="hint" id="table-summary"></p>
+          <div class="tscroll big"><table class="cs-table" id="data-table"></table></div>
+          <button class="more-btn" id="more-rows-btn" type="button" hidden>더 보기</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="drawer-backdrop sheet-mode" id="runs-sheet" hidden>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="runs-sheet-title">
       <div class="sheet-grip" aria-hidden="true"></div>
-      <div class="sheet-head">
+      <div class="drawer-head">
         <h2 id="runs-sheet-title">런 선택</h2>
         <button class="btn primary" id="runs-done" type="button">완료</button>
       </div>
@@ -166,12 +134,21 @@
     </div>
   </div>
 
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="그림 보기">
+    <button type="button" class="icon-btn light" id="lightbox-close" aria-label="닫기"></button>
+    <div class="lightbox-scroll"><img id="lightbox-img" alt=""></div>
+    <p id="lightbox-caption"></p>
+  </div>
+
   <div class="drop-overlay" id="drop-overlay" hidden>여기에 놓아서 열기</div>
   <div class="toast" id="toast" hidden></div>
 
   <script src="js/zip.js"></script>
   <script src="js/cap.js"></script>
+  <script src="js/richtext.js"></script>
+  <script src="js/util.js"></script>
   <script src="js/chart.js"></script>
+  <script src="js/widgets.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

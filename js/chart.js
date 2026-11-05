@@ -40,6 +40,9 @@
       this.yLabel = '';
       this.view = null;
       this.showPoints = false;
+      this.showLines = true;
+      this.showLegend = true;
+      this.emptyText = '';
       this.rangeMode = false;
       this.selection = null; // [x0, x1]
       this.picked = null; // {si, i}
@@ -52,8 +55,8 @@
       this.h = 0;
       this._raf = 0;
 
-      const ro = new ResizeObserver(() => this.resize());
-      ro.observe(canvas);
+      this._ro = new ResizeObserver(() => this.resize());
+      this._ro.observe(canvas);
       canvas.addEventListener('pointerdown', (e) => this.onDown(e));
       canvas.addEventListener('pointermove', (e) => this.onMove(e));
       canvas.addEventListener('pointerup', (e) => this.onUp(e));
@@ -61,7 +64,9 @@
       canvas.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
       canvas.addEventListener('contextmenu', (e) => e.preventDefault());
       const mq = global.matchMedia && global.matchMedia('(prefers-color-scheme: dark)');
-      if (mq && mq.addEventListener) mq.addEventListener('change', () => this.draw());
+      this._onScheme = () => this.draw();
+      this._mq = mq;
+      if (mq && mq.addEventListener) mq.addEventListener('change', this._onScheme);
       this.resize();
     }
 
@@ -284,15 +289,24 @@
       ctx.fillText(this.yLabel, 0, 0);
       ctx.restore();
 
-      if (this.exportLegend && this.exportLegend.length) this.drawLegend(this.exportLegend, r, c);
+      const hasData = this.series.some((s) => s.x.length);
+      if (!hasData && this.emptyText) {
+        ctx.font = '13px system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
+        ctx.fillStyle = c.axis;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.emptyText, r.x + r.w / 2, r.y + r.h / 2);
+      }
+      const legend = this.exportLegend || (this.showLegend ? this.series.filter((s) => s.x.length).map((s) => ({ label: s.label, color: s.color })) : null);
+      if (legend && legend.length) this.drawLegend(legend, r, c);
     }
 
     drawLegend(items, r, c) {
       const ctx = this.ctx;
-      const MAX = 10;
-      const shown = items.slice(0, MAX);
+      const MAX = Math.max(1, Math.min(10, Math.floor((r.h * 0.6) / 17) - 1));
+      const shown = items.length > MAX + 1 ? items.slice(0, MAX) : items;
       const rows = shown.map((it) => it.label);
-      if (items.length > MAX) rows.push('외 ' + (items.length - MAX) + '개');
+      if (items.length > shown.length) rows.push('외 ' + (items.length - shown.length) + '개');
       ctx.font = '12px system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
       let w = 0;
       for (const t of rows) w = Math.max(w, ctx.measureText(t).width);
@@ -313,13 +327,18 @@
       ctx.textBaseline = 'middle';
       rows.forEach((t, i) => {
         const cy = y + 5 + lh * i + lh / 2;
-        if (shown[i]) {
+        if (shown[i] && this.showLines) {
           ctx.strokeStyle = shown[i].color;
           ctx.lineWidth = 2.5;
           ctx.beginPath();
           ctx.moveTo(x + 8, cy);
           ctx.lineTo(x + 22, cy);
           ctx.stroke();
+        } else if (shown[i]) {
+          ctx.fillStyle = shown[i].color;
+          ctx.beginPath();
+          ctx.arc(x + 15, cy, 4, 0, Math.PI * 2);
+          ctx.fill();
         }
         ctx.fillStyle = c.text;
         ctx.save();
@@ -330,6 +349,14 @@
         ctx.restore();
       });
       ctx.restore();
+    }
+
+    destroy() {
+      if (this._ro) this._ro.disconnect();
+      if (this._mq && this._mq.removeEventListener) this._mq.removeEventListener('change', this._onScheme);
+      if (this._raf) cancelAnimationFrame(this._raf);
+      this._raf = 0;
+      this.series = [];
     }
 
     /** Render once with an in-canvas legend and return a PNG blob. */
@@ -393,11 +420,12 @@
           else { ctx.moveTo(X, Y); pen = true; }
         }
       }
-      ctx.stroke();
+      if (this.showLines || dense) ctx.stroke();
 
-      if (this.showPoints && !dense) {
+      if ((this.showPoints || !this.showLines) && !dense) {
         ctx.fillStyle = s.color;
-        const rad = n > r.w ? 1.6 : 2.6;
+        const perPx = n / Math.max(1, r.w);
+        const rad = perPx > 1 ? 1.4 : this.showLines ? (perPx > 0.25 ? 1.8 : 2.6) : perPx > 0.25 ? 2.4 : 3.4;
         ctx.beginPath();
         for (let i = 0; i < n; i++) {
           const x = xs[i], y = ys[i];
