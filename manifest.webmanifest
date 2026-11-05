@@ -1,0 +1,34 @@
+{
+  "name": "CAP 뷰어 - Capstone 파일 보기",
+  "short_name": "CAP 뷰어",
+  "description": "PASCO Capstone(.cap) 실험 파일을 휴대폰에서 그래프와 표로 보는 앱",
+  "lang": "ko",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "share_target": {
+    "action": "./share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        { "name": "file", "accept": ["*/*", ".cap", "application/octet-stream", "application/zip"] }
+      ]
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": { "application/x-pasco-capstone": [".cap"] }
+    }
+  ]
+}
