@@ -135,22 +135,18 @@
     if (active) active.scrollIntoView({ block: 'nearest', inline: 'center' });
   }
 
-  function renderPage() {
-    destroyWidgets();
-    const cap = state.cap;
-    const page = cap.pages[state.page];
-    const host = $('#page-host');
-    host.className = 'page-host mode-' + state.mode;
-    host.replaceChildren();
+  /** Build the displays of one page. */
+  function buildPaper(page, mode, context) {
     const paper = el('div', 'paper');
+    const widgets = [];
     // In the original layout, passive boxes (text, pictures) go underneath graphs/tables so their
     // tools stay reachable; Capstone draws text boxes transparently, so nothing visible is lost.
     const passive = (it) => (it.type === 'text' || it.type === 'image' ? 0 : 1);
-    const items = state.mode === 'reflow' ? readingOrder(page.items) : page.items.slice().sort((a, b) => passive(a) - passive(b) || a.z - b.z);
+    const items = mode === 'reflow' ? readingOrder(page.items) : page.items.slice().sort((a, b) => passive(a) - passive(b) || a.z - b.z);
     items.forEach((item, i) => {
-      const w = W.create(item, ctx);
+      const w = W.create(item, context);
       if (w.hidden) return;
-      if (state.mode === 'layout') {
+      if (mode === 'layout') {
         const s = w.root.style;
         s.left = item.x * 100 + '%';
         s.top = item.y * 100 + '%';
@@ -159,9 +155,22 @@
         s.zIndex = String(i + 1);
       }
       paper.appendChild(w.root);
-      state.widgets.push(w);
+      widgets.push(w);
     });
-    if (!state.widgets.length) paper.appendChild(el('p', 'page-empty', '이 페이지에는 표시할 내용이 없습니다.'));
+    if (!widgets.length && mode === 'reflow') paper.appendChild(el('p', 'page-empty', '이 페이지에는 표시할 내용이 없습니다.'));
+    return { paper, widgets };
+  }
+
+  function renderPage() {
+    destroyWidgets();
+    const cap = state.cap;
+    const page = cap.pages[state.page];
+    const host = $('#page-host');
+    host.className = 'page-host mode-' + state.mode;
+    host.replaceChildren();
+    const built = buildPaper(page, state.mode, ctx);
+    const paper = built.paper;
+    state.widgets = built.widgets;
     if (state.mode === 'layout') {
       const frame = el('div', 'paper-frame');
       frame.appendChild(paper);
@@ -380,6 +389,171 @@
     openOverlay(() => { $('#lightbox').hidden = true; document.body.classList.remove('no-scroll'); });
   }
 
+  // ---------- PDF export ----------
+  const A4 = { w: 2339, h: 1654, wPt: 841.89, hPt: 595.28 }; // landscape, ~200 dpi
+  let html2canvasLoading = null;
+  function loadHtml2canvas() {
+    if (window.html2canvas) return Promise.resolve(window.html2canvas);
+    if (!html2canvasLoading) {
+      html2canvasLoading = new Promise((resolve, reject) => {
+        const sc = document.createElement('script');
+        sc.src = 'vendor/html2canvas.min.js';
+        sc.onload = () => (window.html2canvas ? resolve(window.html2canvas) : reject(new Error('html2canvas 없음')));
+        sc.onerror = () => { html2canvasLoading = null; reject(new Error('PDF 변환 모듈을 불러오지 못했습니다')); };
+        document.head.appendChild(sc);
+      });
+    }
+    return html2canvasLoading;
+  }
+  const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  /** Render one workbook page (original layout) to a canvas. */
+  async function capturePage(page, html2canvas) {
+    const stage = $('#export-stage');
+    stage.className = 'export-stage page-host mode-layout export';
+    const exportCtx = Object.create(ctx, { mode: { value: 'layout' }, exporting: { value: true } });
+    const { paper, widgets } = buildPaper(page, 'layout', exportCtx);
+    paper.style.width = page.width + 'px';
+    paper.style.height = page.height + 'px';
+    stage.replaceChildren(paper);
+    try {
+      for (const w of widgets) w.mount();
+      await nextFrame();
+      await Promise.race([Promise.all(widgets.map((w) => w.ready())), sleep(8000)]);
+      for (const w of widgets) if (w.fitToBox) await w.fitToBox();
+      await nextFrame();
+      for (const w of widgets) await w.ready(); // charts draw at their final size
+      const scale = Math.min(2.5, 2400 / page.width);
+      return await html2canvas(paper, {
+        scale,
+        backgroundColor: '#ffffff',
+        logging: false,
+        useCORS: false,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: Math.max(page.width + 40, window.innerWidth),
+        windowHeight: Math.max(page.height + 40, window.innerHeight),
+        onclone: (doc) => { const s = doc.getElementById('export-stage'); if (s) s.style.opacity = '1'; },
+      });
+    } finally {
+      for (const w of widgets) w.destroy();
+      stage.replaceChildren();
+    }
+  }
+
+  /** Put the captured page on a PDF page (A4 landscape with a footer, or the page's own size). */
+  function composePage(shot, page, index, count, paperMode) {
+    if (paperMode === 'page') {
+      const ratio = shot.height / shot.width;
+      return { canvas: shot, wPt: A4.wPt, hPt: A4.wPt * ratio };
+    }
+    const c = document.createElement('canvas');
+    c.width = A4.w;
+    c.height = A4.h;
+    const g = c.getContext('2d');
+    g.fillStyle = '#ffffff';
+    g.fillRect(0, 0, c.width, c.height);
+    const margin = 70, footer = 70;
+    const aw = c.width - 2 * margin, ah = c.height - 2 * margin - footer;
+    const k = Math.min(aw / shot.width, ah / shot.height);
+    const w = Math.round(shot.width * k), h = Math.round(shot.height * k);
+    const x = Math.round((c.width - w) / 2), y = Math.round((c.height - h - footer) / 2);
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(shot, x, y, w, h);
+    g.strokeStyle = '#c3c8d0';
+    g.lineWidth = 2;
+    g.strokeRect(x - 1, y - 1, w + 2, h + 2);
+    g.fillStyle = '#5b6370';
+    g.font = '28px system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif';
+    g.textBaseline = 'middle';
+    const fy = y + h + footer / 2 + 10;
+    g.textAlign = 'left';
+    const left = (state.cap.fileName || '') + '  ·  ' + page.name;
+    g.fillText(left.length > 90 ? left.slice(0, 89) + '…' : left, x, fy);
+    g.textAlign = 'right';
+    g.fillText(index + 1 + ' / ' + count, x + w, fy);
+    return { canvas: c, wPt: A4.wPt, hPt: A4.hPt };
+  }
+
+  function toJpeg(canvas) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((b) => (b ? b.arrayBuffer().then((a) => resolve(new Uint8Array(a)), reject) : reject(new Error('이미지 변환 실패'))), 'image/jpeg', 0.9);
+    });
+  }
+
+  const pdfJob = { running: false, cancel: false, blob: null, name: '' };
+
+  async function makePdf(opts, onProgress) {
+    const cap = state.cap;
+    const indices = opts.range === 'current' ? [state.page] : cap.pages.map((_, i) => i);
+    const html2canvas = await loadHtml2canvas();
+    const out = [];
+    for (let k = 0; k < indices.length; k++) {
+      if (pdfJob.cancel) throw new Error('취소했습니다');
+      const page = cap.pages[indices[k]];
+      onProgress(k, indices.length, page.name);
+      const shot = await capturePage(page, html2canvas);
+      const composed = composePage(shot, page, k, indices.length, opts.paper);
+      const jpeg = await toJpeg(composed.canvas);
+      out.push({ jpeg, width: composed.canvas.width, height: composed.canvas.height, widthPt: composed.wPt, heightPt: composed.hPt, title: page.name });
+      shot.width = shot.height = 0; // free memory early (phones)
+      if (composed.canvas !== shot) composed.canvas.width = composed.canvas.height = 0;
+    }
+    onProgress(indices.length, indices.length, '');
+    return window.CapPdf.build(out, { title: (cap.fileName || 'Capstone').replace(/\.cap$/i, '') });
+  }
+
+  function pdfView(which) {
+    $('#pdf-options').hidden = which !== 'options';
+    $('#pdf-progress').hidden = which !== 'progress';
+    $('#pdf-done').hidden = which !== 'done';
+  }
+
+  function openPdfSheet() {
+    if (!state.cap) return;
+    if (!pdfJob.running) {
+      pdfView(pdfJob.blob ? 'done' : 'options');
+      $('#pdf-range-all-label').textContent = '전체 페이지 (' + state.cap.pages.length + '쪽)';
+      $('#pdf-range-current-label').textContent = '지금 보는 페이지만 (' + state.cap.pages[state.page].name + ')';
+    }
+    $('#pdf-sheet').hidden = false;
+    openOverlay(() => {
+      $('#pdf-sheet').hidden = true;
+      if (pdfJob.running) pdfJob.cancel = true;
+    });
+  }
+
+  async function startPdf() {
+    if (pdfJob.running) return;
+    const opts = {
+      range: document.querySelector('input[name="pdf-range"]:checked').value,
+      paper: document.querySelector('input[name="pdf-paper"]:checked').value,
+    };
+    pdfJob.running = true;
+    pdfJob.cancel = false;
+    pdfJob.blob = null;
+    pdfView('progress');
+    $('#pdf-bar').style.width = '0%';
+    $('#pdf-status').textContent = 'PDF 변환 준비 중…';
+    try {
+      const blob = await makePdf(opts, (k, n, name) => {
+        $('#pdf-status').textContent = k < n ? k + 1 + ' / ' + n + ' 페이지 변환 중… ' + name : 'PDF 파일 만드는 중…';
+        $('#pdf-bar').style.width = Math.round((k / n) * 100) + '%';
+      });
+      pdfJob.blob = blob;
+      pdfJob.name = U.safeFile(baseName() + (opts.range === 'current' ? '_' + state.cap.pages[state.page].name : '')) + '.pdf';
+      $('#pdf-result').textContent = (opts.range === 'current' ? 1 : state.cap.pages.length) + '쪽 · ' + U.fmtBytes(blob.size);
+      pdfView('done');
+    } catch (e) {
+      console.error(e);
+      pdfView('options');
+      if (!pdfJob.cancel) toast('PDF를 만들지 못했습니다: ' + (e && e.message ? e.message : e));
+    } finally {
+      pdfJob.running = false;
+    }
+  }
+
   // ---------- loading ----------
   function showView(which) {
     $('#welcome').hidden = which !== 'welcome';
@@ -448,6 +622,8 @@
     state.zoom = 1;
     state.table = null;
     state.tableRunId = null;
+    pdfJob.blob = null;
+    $('#pdf-btn').hidden = false;
     $('#doc-title').textContent = cap.fileName || 'Capstone 파일';
     $('#doc-sub').textContent = cap.pages.length + '개 페이지 · ' + (cap.runs.length ? cap.runs.length + '개 런' : '측정 데이터 없음');
     showView('viewer');
@@ -549,6 +725,25 @@
     try { await navigator.share({ files: [file], title: run.name }); } catch (e) { if (e && e.name !== 'AbortError') toast('공유하지 못했습니다'); }
   });
 
+  // PDF
+  $('#pdf-btn').innerHTML = icon('pdf', 18) + '<span>PDF</span>';
+  $('#pdf-close').innerHTML = icon('close', 22);
+  $('#pdf-btn').addEventListener('click', openPdfSheet);
+  $('#pdf-close').addEventListener('click', closeOverlay);
+  $('#pdf-sheet').addEventListener('click', (e) => { if (e.target === e.currentTarget && !pdfJob.running) closeOverlay(); });
+  $('#pdf-start').addEventListener('click', startPdf);
+  $('#pdf-cancel').addEventListener('click', () => { pdfJob.cancel = true; $('#pdf-status').textContent = '취소하는 중…'; });
+  $('#pdf-again').addEventListener('click', () => { pdfJob.blob = null; pdfView('options'); });
+  $('#pdf-save').addEventListener('click', () => { if (pdfJob.blob) U.saveBlob(pdfJob.blob, pdfJob.name); });
+  $('#pdf-share').addEventListener('click', async () => {
+    if (!pdfJob.blob) return;
+    const file = new File([pdfJob.blob], pdfJob.name, { type: 'application/pdf' });
+    try { await navigator.share({ files: [file], title: pdfJob.name }); } catch (e) { if (e && e.name !== 'AbortError') toast('공유하지 못했습니다'); }
+  });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [new File(['%PDF'], 'a.pdf', { type: 'application/pdf' })] })) $('#pdf-share').hidden = false;
+  } catch (e) { /* not supported */ }
+
   // run sheet
   $('#runs-done').addEventListener('click', closeOverlay);
   $('#runs-sheet').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeOverlay(); });
@@ -624,5 +819,5 @@
   checkSharedFile();
 
   // for tests / debugging
-  window.CapViewerApp = { state, openFile, goPage, computeStats: U.computeStats };
+  window.CapViewerApp = { state, openFile, goPage, computeStats: U.computeStats, makePdf };
 })();

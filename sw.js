@@ -1,5 +1,5 @@
 /* Service worker: offline app shell + receives files shared to the installed app. */
-const VERSION = 'cap-viewer-v2';
+const VERSION = 'cap-viewer-v3';
 const SHELL = [
   './',
   './index.html',
@@ -10,6 +10,8 @@ const SHELL = [
   './js/util.js',
   './js/chart.js',
   './js/widgets.js',
+  './js/pdf.js',
+  './vendor/html2canvas.min.js',
   './js/app.js',
   './manifest.webmanifest',
   './icons/icon.svg',

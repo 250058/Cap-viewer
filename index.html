@@ -26,6 +26,7 @@
         <p id="doc-sub">PASCO Capstone 파일 보기</p>
       </div>
     </div>
+    <button type="button" class="btn" id="pdf-btn" hidden title="모든 페이지를 PDF로 저장"></button>
     <label class="btn primary" for="file-input" id="open-btn">
       <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>
       <span>열기</span>
@@ -134,6 +135,47 @@
     </div>
   </div>
 
+  <div class="drawer-backdrop sheet-mode" id="pdf-sheet" hidden>
+    <div class="sheet pdf-sheet" role="dialog" aria-modal="true" aria-labelledby="pdf-title">
+      <div class="sheet-grip" aria-hidden="true"></div>
+      <div class="drawer-head">
+        <h2 id="pdf-title">PDF로 저장</h2>
+        <button type="button" class="icon-btn" id="pdf-close" aria-label="닫기"></button>
+      </div>
+      <div id="pdf-options">
+        <p class="hint">Capstone 화면(원본 배치)을 한 페이지씩 PDF 한 쪽으로 만듭니다. 파일은 기기 안에서만 만들어집니다.</p>
+        <fieldset class="opt-group">
+          <legend>범위</legend>
+          <label class="opt"><input type="radio" name="pdf-range" value="all" checked><span id="pdf-range-all-label">전체 페이지</span></label>
+          <label class="opt"><input type="radio" name="pdf-range" value="current"><span id="pdf-range-current-label">지금 보는 페이지만</span></label>
+        </fieldset>
+        <fieldset class="opt-group">
+          <legend>용지</legend>
+          <label class="opt"><input type="radio" name="pdf-paper" value="a4" checked><span>A4 가로 <small>(인쇄용, 아래에 파일명·쪽 번호)</small></span></label>
+          <label class="opt"><input type="radio" name="pdf-paper" value="page"><span>화면 비율 그대로 <small>(여백 없음)</small></span></label>
+        </fieldset>
+        <button type="button" class="btn primary big wide" id="pdf-start">PDF 만들기</button>
+      </div>
+      <div id="pdf-progress" class="pdf-progress" hidden aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="pdf-status">PDF 변환 준비 중…</p>
+        <div class="progress"><div id="pdf-bar"></div></div>
+        <button type="button" class="btn ghost" id="pdf-cancel">취소</button>
+      </div>
+      <div id="pdf-done" class="pdf-done" hidden>
+        <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true" fill="currentColor"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm4.3 6.3-5.6 5.6-2.9-2.9-1.4 1.4 4.3 4.3 7-7-1.4-1.4z"/></svg>
+        <p><b>PDF가 만들어졌어요</b><br><span id="pdf-result" class="muted"></span></p>
+        <div class="row-btns center">
+          <button type="button" class="btn primary big" id="pdf-save">PDF 저장</button>
+          <button type="button" class="btn big" id="pdf-share" hidden>공유</button>
+        </div>
+        <button type="button" class="link-btn" id="pdf-again">설정을 바꿔 다시 만들기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-stage" id="export-stage" aria-hidden="true"></div>
+
   <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="그림 보기">
     <button type="button" class="icon-btn light" id="lightbox-close" aria-label="닫기"></button>
     <div class="lightbox-scroll"><img id="lightbox-img" alt=""></div>
@@ -149,6 +191,7 @@
   <script src="js/util.js"></script>
   <script src="js/chart.js"></script>
   <script src="js/widgets.js"></script>
+  <script src="js/pdf.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -46,6 +46,22 @@
     mount() {}
     resize() {}
     destroy() {}
+    /** Resolves when the display is fully drawn (pictures loaded, charts painted). */
+    ready() { return Promise.resolve(); }
+  }
+
+  /** Shrink rich text until it fits its box (PDF export: nothing can scroll on paper). */
+  function fitText(w) {
+    if (!w.rt || !w.item.html) return Promise.resolve();
+    const body = w.body;
+    let scale = 1;
+    while (body.scrollHeight > body.clientHeight + 2 && scale > 0.56) {
+      scale = Math.round((scale - 0.06) * 100) / 100;
+      const rt = RT.render(w.item.html, { mode: 'layout', loadImage: w.ctx.loadImage, scale });
+      w.rt.replaceWith(rt);
+      w.rt = rt;
+    }
+    return w.rt.ready;
   }
 
   // ---------- text ----------
@@ -54,9 +70,12 @@
       super(item, ctx);
       this.empty = RT.isEmpty(item.html);
       if (item.bg && item.bg !== 'rgba(255,255,255,1.000)') this.body.style.background = item.bg;
-      this.body.appendChild(RT.render(item.html, { mode: ctx.mode, loadImage: ctx.loadImage }));
+      this.rt = RT.render(item.html, { mode: ctx.mode, loadImage: ctx.loadImage });
+      this.body.appendChild(this.rt);
     }
     get hidden() { return this.empty && this.ctx.mode === 'reflow'; }
+    ready() { return this.rt.ready; }
+    fitToBox() { return fitText(this); }
   }
 
   class EntryWidget extends Widget {
@@ -66,9 +85,12 @@
       if (RT.isEmpty(item.html)) {
         this.body.appendChild(el('p', 'entry-empty', '입력된 내용이 없습니다'));
       } else {
-        this.body.appendChild(RT.render(item.html, { mode: ctx.mode, loadImage: ctx.loadImage }));
+        this.rt = RT.render(item.html, { mode: ctx.mode, loadImage: ctx.loadImage });
+        this.body.appendChild(this.rt);
       }
     }
+    ready() { return this.rt ? this.rt.ready : Promise.resolve(); }
+    fitToBox() { return fitText(this); }
   }
 
   // ---------- image ----------
@@ -84,12 +106,14 @@
       btn.setAttribute('aria-label', '그림 크게 보기');
       btn.appendChild(img);
       this.body.appendChild(btn);
-      ctx.loadImage(item.file).then((url) => {
-        if (url) img.src = url;
-        else this.body.replaceChildren(el('p', 'missing', '그림 파일을 찾을 수 없습니다'));
+      this.loaded = ctx.loadImage(item.file).then((url) => {
+        if (!url) { this.body.replaceChildren(el('p', 'missing', '그림 파일을 찾을 수 없습니다')); return; }
+        img.src = url;
+        return img.decode ? img.decode().catch(() => {}) : null;
       });
       btn.addEventListener('click', () => { if (img.src) ctx.openImage(img.src, item.title); });
     }
+    ready() { return this.loaded; }
   }
 
   // ---------- graph ----------
@@ -157,6 +181,7 @@
 
     mount() {
       this.chart = new global.CapChart(this.canvas, {
+        minDpr: this.ctx.exporting ? 2.5 : 1,
         onPick: (p) => this.showCoord(p),
         onSelect: (sel) => { this.range = sel; this.renderStats(); },
       });
@@ -169,6 +194,10 @@
 
     resize() { if (this.chart) this.chart.resize(); }
     destroy() { if (this.chart) this.chart.destroy(); }
+    ready() {
+      if (this.chart) { this.chart.resize(); this.chart.renderNow(); }
+      return Promise.resolve();
+    }
 
     measOptions(includeTime, current) {
       const cap = this.ctx.cap;
@@ -274,9 +303,10 @@
           sorted: this.xId === cap.time.id && !run.indexBased,
         });
       }
+      const mark = this.ctx.exporting ? '' : ' ▾'; // dropdown hint only on screen
       this.chart.setData(this.series, {
-        xLabel: U.measLabel(xm, xu.symbol) + ' ▾',
-        yLabel: (ym ? U.measLabel(ym, yu.symbol) : '측정값 선택') + ' ▾',
+        xLabel: U.measLabel(xm, xu.symbol) + mark,
+        yLabel: (ym ? U.measLabel(ym, yu.symbol) : this.ctx.exporting ? '' : '측정값 선택') + mark,
         keepView,
       });
       this.bRuns.querySelector('span').textContent = '런 ' + this.series.length;

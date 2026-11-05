@@ -72,7 +72,7 @@
 
     resize() {
       const r = this.canvas.getBoundingClientRect();
-      this.dpr = Math.min(global.devicePixelRatio || 1, 3);
+      this.dpr = Math.max(this.opts.minDpr || 1, Math.min(global.devicePixelRatio || 1, 3));
       this.w = Math.max(10, r.width);
       this.h = Math.max(10, r.height);
       this.canvas.width = Math.round(this.w * this.dpr);
@@ -349,6 +349,12 @@
         ctx.restore();
       });
       ctx.restore();
+    }
+
+    /** Draw immediately (used before capturing the page as an image). */
+    renderNow() {
+      if (this._raf) { cancelAnimationFrame(this._raf); this._raf = 0; }
+      this._draw();
     }
 
     destroy() {

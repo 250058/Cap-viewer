@@ -116,6 +116,18 @@ try {
       await page.waitForTimeout(300);
       check((await page.locator('.mode-layout .paper .disp').count()) === 4, 'original layout shows the 4 displays');
 
+      // PDF export of all pages
+      await page.click('#pdf-btn');
+      await page.click('#pdf-start');
+      await page.waitForSelector('#pdf-done:not([hidden])', { timeout: 60000 });
+      const [dl] = await Promise.all([page.waitForEvent('download'), page.click('#pdf-save')]);
+      const pdf = fs.readFileSync(await dl.path()).toString('latin1');
+      check(pdf.startsWith('%PDF-1.4') && pdf.trimEnd().endsWith('%%EOF'), 'PDF file downloaded (' + dl.suggestedFilename() + ', ' + Math.round(pdf.length / 1024) + ' KB)');
+      check((pdf.match(/\/Type \/Page /g) || []).length === 2, 'PDF has one page per workbook page');
+      check(pdf.includes('/Outlines') && (pdf.match(/\/Subtype \/Image/g) || []).length === 2, 'PDF has page images and bookmarks');
+      await page.click('#pdf-close');
+      await page.waitForTimeout(200);
+
       // sanitizer: hostile HTML must not run or keep handlers
       const xss = await page.evaluate(() => {
         const html = '<p onclick="window.__p=1">a<img src=x onerror="window.__p=2"><script>window.__p=3<\/script>' +

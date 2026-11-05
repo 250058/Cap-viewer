@@ -59,10 +59,12 @@
    */
   function render(html, opts) {
     const mode = (opts && opts.mode) || 'layout';
+    const k = (opts && opts.scale) || 1; // layout mode: shrink everything (used to fit text boxes in PDFs)
     const loadImage = opts && opts.loadImage;
     const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
     const root = document.createElement('div');
     root.className = 'rt';
+    const pending = [];
 
     // base font from <body style="font-size: 14px">
     let base = 14;
@@ -72,15 +74,22 @@
       if (k === 'font-weight' && /^(bold|[6-9]00)$/.test(v)) root.style.fontWeight = 'bold';
     }
     const sizePx = (px) => {
-      if (mode === 'layout') return px;
+      if (mode === 'layout') return Math.round(px * k * 10) / 10;
       const r = px / base;
       return Math.max(11, Math.round((r > 1 ? REFLOW_BASE * Math.pow(r, 0.6) : REFLOW_BASE * r) * 10) / 10);
     };
     root.style.fontSize = sizePx(base) + 'px';
 
+    const scale = k;
+    const scalePx = (v) => {
+      const px = toPx(v);
+      return Number.isFinite(px) && scale !== 1 ? Math.round(px * scale * 10) / 10 + 'px' : v;
+    };
+
     function cleanStyle(el, src, tag) {
       const parts = [];
-      for (const [k, v] of parseStyle(src)) {
+      for (const [prop, v] of parseStyle(src)) {
+        const k = prop;
         if (!STYLE.has(k) || !safeValue(v)) continue;
         if (k === 'font-size') {
           const px = toPx(v);
@@ -100,7 +109,11 @@
           continue;
         }
         if (k === 'width' || k === 'height') {
-          if (mode === 'layout' && (tag === 'IMG' || tag === 'TD' || tag === 'TH' || tag === 'TABLE')) parts.push(k + ':' + v);
+          if (mode === 'layout' && (tag === 'IMG' || tag === 'TD' || tag === 'TH' || tag === 'TABLE')) parts.push(k + ':' + scalePx(v));
+          continue;
+        }
+        if (mode === 'layout' && /^(margin|padding)-|^text-indent$/.test(k)) {
+          parts.push(k + ':' + scalePx(v));
           continue;
         }
         if (mode === 'reflow' && /^margin-(left|right)$|^text-indent$/.test(k)) {
@@ -151,11 +164,11 @@
           const pad = n.getAttribute('cellpadding');
           if (/^\d{1,2}$/.test(pad || '')) el.dataset.pad = pad;
           const w = n.getAttribute('width');
-          if (mode === 'layout' && w && /^\d+%?$/.test(w)) el.style.width = /%$/.test(w) ? w : w + 'px';
+          if (mode === 'layout' && w && /^\d+%?$/.test(w)) el.style.width = /%$/.test(w) ? w : w * k + 'px';
         }
         if ((tag === 'TD' || tag === 'TH') && mode === 'layout') {
           const w = n.getAttribute('width');
-          if (w && /^\d+%?$/.test(w)) el.style.width = /%$/.test(w) ? w : w + 'px';
+          if (w && /^\d+%?$/.test(w)) el.style.width = /%$/.test(w) ? w : w * k + 'px';
         }
         if (tag === 'A') {
           const href = n.getAttribute('href') || '';
@@ -169,14 +182,18 @@
           const srcPath = n.getAttribute('src') || '';
           const w = Number(n.getAttribute('width'));
           const h = Number(n.getAttribute('height'));
-          if (mode === 'layout' && w > 0) el.style.width = w + 'px';
-          if (mode === 'layout' && h > 0) el.style.height = h + 'px';
+          if (mode === 'layout' && w > 0) el.style.width = w * k + 'px';
+          if (mode === 'layout' && h > 0) el.style.height = h * k + 'px';
           el.setAttribute('alt', n.getAttribute('alt') || '');
           if (/^data:image\/(png|jpe?g|gif|bmp|webp);base64,/i.test(srcPath)) {
             el.setAttribute('src', srcPath);
           } else if (loadImage && srcPath && !/^[a-z]+:\/\//i.test(srcPath)) {
             const path = srcPath.replace(/^file:\/*/i, '').replace(/^\.\//, '').replace(/\\/g, '/');
-            loadImage(path).then((url) => { if (url) el.src = url; else el.remove(); }, () => el.remove());
+            pending.push(loadImage(path).then((url) => {
+              if (!url) { el.remove(); return; }
+              el.src = url;
+              return el.decode ? el.decode().catch(() => {}) : null;
+            }, () => el.remove()));
           } else {
             continue;
           }
@@ -187,6 +204,7 @@
     }
 
     copy(doc.body || doc.documentElement, root);
+    root.ready = Promise.all(pending);
     return root;
   }
 
