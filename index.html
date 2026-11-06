@@ -48,26 +48,45 @@
 
   <main id="workspace">
     <section id="welcome" class="welcome">
-      <div class="drop-card">
-        <img class="drop-icon" src="icons/icon.svg" alt="" width="84" height="84">
-        <h2>Capstone 실험 파일을 휴대폰에서 그대로</h2>
-        <p>PASCO Capstone에서 저장한 <b>.cap</b> 파일의 페이지, 설명문, 그림, 그래프, 표를 Capstone처럼 볼 수 있어요.</p>
-        <label class="btn primary big" for="file-input">.cap 파일 선택</label>
-        <button class="btn ghost" id="demo-btn" type="button">예제 파일 열기</button>
-        <p class="privacy">
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
-          파일은 이 기기 안에서만 처리되며 어디에도 업로드되지 않습니다.
-        </p>
+      <div class="hero">
+        <div class="hero-text">
+          <h2>Capstone 실험 파일을<br>휴대폰에서 그대로</h2>
+          <p class="hero-sub">실험실에서 저장한 <b>.cap</b> 파일의 페이지, 설명문, 그래프, 표를 Capstone 화면처럼 보고 PDF와 CSV로 저장해요</p>
+          <div class="hero-actions">
+            <label class="btn primary big" for="file-input">.cap 파일 선택</label>
+            <button class="btn big" id="demo-btn" type="button">예제 파일 열기</button>
+          </div>
+          <p class="privacy"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>파일은 이 기기 안에서만 처리되고 어디에도 올라가지 않아요</p>
+        </div>
+        <figure class="hero-preview" aria-label="예제 파일을 연 화면 미리보기">
+          <div class="pv-window">
+            <div class="pv-bar"><img src="icons/icon.svg" alt="" width="20" height="20"><b>경사면 수레.cap</b><span>2개 페이지 · 3개 런</span></div>
+            <div class="pv-tabs"><span>실험 안내</span><span class="on">데이터 분석</span></div>
+            <div class="pv-work">
+              <div class="pv-page">
+                <div class="pv-title">데이터 분석</div>
+                <div class="pv-cols">
+                  <div class="pv-side">
+                    <div class="pv-digits"><small>마지막 속도</small><b>1.99<span>m/s</span></b></div>
+                    <table class="pv-table"><thead><tr><th>Time (s)</th><th>Position (m)</th></tr></thead><tbody><tr><td>1.00</td><td>0.560</td></tr><tr><td>1.05</td><td>0.625</td></tr><tr><td>1.10</td><td>0.696</td></tr><tr><td>1.15</td><td>0.774</td></tr><tr><td>1.20</td><td>0.857</td></tr></tbody></table>
+                  </div>
+                  <div class="pv-graph">
+                    <div class="pv-legend"><span><i style="background:#1f5fd1"></i>경사 5°</span><span><i style="background:#d62d20"></i>경사 10°</span><span><i style="background:#1a9c3e"></i>경사 15°</span></div>
+                    <svg class="pv-chart" viewBox="0 0 320 196" role="img" aria-label="위치–시간 그래프: 경사가 클수록 수레가 빨리 내려간다"><g class="pv-grid"><path d="M100.8 16V168"/><path d="M165.5 16V168"/><path d="M230.3 16V168"/><path d="M295.0 16V168"/><path d="M36 140.4H308"/><path d="M36 112.7H308"/><path d="M36 85.1H308"/><path d="M36 57.5H308"/><path d="M36 29.8H308"/></g><path class="pv-axis" d="M36 16V168H308"/><g class="pv-lines"><polyline points="36.0,161.1 42.5,161.1 49.0,161.1 55.4,161.1 61.9,161.1 68.4,161.1 74.9,161.1 81.3,161.1 87.8,161.1 94.3,161.1 100.8,161.1 107.2,161.0 113.7,160.5 120.2,159.9 126.7,158.9 133.1,157.7 139.6,156.1 146.1,154.4 152.6,152.3 159.0,150.0 165.5,147.4 172.0,144.5 178.5,141.3 185.0,137.9 191.4,134.2 197.9,130.2 204.4,126.0 210.9,121.4 217.3,116.6 223.8,111.5 230.3,106.2 236.8,100.6 243.2,94.7 249.7,88.5 256.2,82.0 262.7,75.3 269.1,68.3 275.6,61.0 282.1,53.5 288.6,45.6 295.0,37.6 301.5,29.2 308.0,20.5" stroke="#1f5fd1"/><polyline points="36.0,161.1 42.5,161.1 49.0,161.1 55.4,161.1 61.9,161.1 68.4,161.1 74.9,161.1 81.3,161.1 87.8,161.1 94.3,161.1 100.8,161.1 107.2,160.8 113.7,160.0 120.2,158.5 126.7,156.6 133.1,154.0 139.6,150.9 146.1,147.2 152.6,142.9 159.0,138.1 165.5,132.7 172.0,126.8 178.5,120.2 185.0,113.1 191.4,105.5 197.9,97.2 204.4,88.4 210.9,79.1 217.3,69.1 223.8,58.6 230.3,47.6 236.8,35.9 243.2,23.7" stroke="#d62d20"/><polyline points="36.0,161.1 42.5,161.1 49.0,161.1 55.4,161.1 61.9,161.1 68.4,161.1 74.9,161.1 81.3,161.1 87.8,161.1 94.3,161.1 100.8,161.1 107.2,160.7 113.7,159.4 120.2,157.2 126.7,154.2 133.1,150.4 139.6,145.7 146.1,140.1 152.6,133.7 159.0,126.4 165.5,118.3 172.0,109.3 178.5,99.5 185.0,88.8 191.4,77.2 197.9,64.8 204.4,51.5 210.9,37.4 217.3,22.4" stroke="#1a9c3e"/></g><g class="pv-ticks x"><text x="36.0" y="182">0.0</text><text x="100.8" y="182">0.5</text><text x="165.5" y="182">1.0</text><text x="230.3" y="182">1.5</text><text x="295.0" y="182">2.0</text></g><g class="pv-ticks y"><text x="30" y="171.0">0.2</text><text x="30" y="115.7">0.6</text><text x="30" y="60.5">1.0</text></g></svg>
+                    <div class="pv-fit">경사 15° 2차 맞춤 · 가속도 2A = 2.48 m/s²</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </figure>
       </div>
       <div id="error-box" class="error-box" role="alert" hidden></div>
-      <div class="tips">
-        <h3>사용 팁</h3>
-        <ul>
-          <li>위쪽 <b>페이지 탭</b>이나 아래 화살표 버튼으로 페이지를 넘깁니다</li>
-          <li>그래프 축 이름을 누르면 측정값이 바뀌고, 두 손가락으로 확대, 탭하면 값이 나옵니다</li>
-          <li>카카오톡·드라이브에서 받은 파일은 먼저 휴대폰에 저장한 뒤 고르세요</li>
-        </ul>
-      </div>
+      <ul class="tips" aria-label="사용 팁">
+        <li><b>페이지 넘기기</b><span>위쪽 페이지 탭이나 아래 화살표 버튼</span></li>
+        <li><b>그래프 읽기</b><span>축 이름을 눌러 측정값 바꾸기, 두 손가락으로 확대, 탭하면 값</span></li>
+        <li><b>파일 가져오기</b><span>카카오톡·드라이브에서 받은 파일은 먼저 휴대폰에 저장</span></li>
+      </ul>
     </section>
 
     <section id="loading" class="loading" hidden aria-live="polite">

@@ -188,29 +188,76 @@ svg { flex: none; }
 main { min-height: 50vh; }
 .welcome {
   display: grid;
-  gap: 16px;
-  max-width: 720px;
+  gap: 24px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: 24px max(16px, env(safe-area-inset-right)) 32px max(16px, env(safe-area-inset-left));
+  padding: 32px max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left));
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
-.drop-card {
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
-  padding: 32px 20px 24px;
-  background: var(--chrome-3);
+.hero { display: grid; gap: 32px; align-items: center; }
+.hero-text { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+.hero-text h2 { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 500; letter-spacing: -0.01em; }
+.hero-sub { margin: 0; max-width: 36rem; color: var(--text-2); font-size: 16px; line-height: 24px; }
+.hero-sub b { font-weight: 500; color: var(--chrome-text); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.privacy { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; color: var(--muted); }
+
+/* product preview: the start screen's one rich moment, a real-looking file in the app */
+.hero-preview { margin: 0; min-width: 0; }
+.pv-window {
+  overflow: hidden;
   border: 1px solid var(--chrome-border);
-  border-radius: 12px;
+  border-radius: 16px;
+  background: var(--workspace);
   box-shadow: var(--shadow);
 }
-.drop-icon { width: 80px; height: 80px; }
-.drop-card h2 { margin: 4px 0 0; font-size: 18px; font-weight: 600; line-height: 24px; }
-.drop-card p { margin: 0; color: var(--text-2); font-size: 14px; max-width: 32em; }
-.drop-card .btn.big { margin-top: 8px; }
-.privacy { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 4px !important; color: var(--muted) !important; }
-.tips { background: var(--chrome-3); border: 1px solid var(--chrome-border); border-radius: 12px; padding: 16px 20px; }
-.tips h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
-.tips ul { margin: 0; padding-left: 20px; color: var(--text-2); font-size: 14px; }
-.tips li { margin: 4px 0; }
-.tips b { color: var(--chrome-text); font-weight: 500; }
+.pv-bar { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; background: var(--chrome-3); border-bottom: 1px solid var(--chrome-border); font-size: 13px; }
+.pv-bar b { font-weight: 500; }
+.pv-bar span { color: var(--muted); font-size: 12px; }
+.pv-tabs { display: flex; gap: 4px; padding: 8px 8px 0; background: var(--chrome); border-bottom: 1px solid var(--chrome-border); font-size: 12px; color: var(--text-2); }
+.pv-tabs span { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px; border-radius: 8px 8px 0 0; }
+.pv-tabs .on { background: #fff; color: #171717; border: 1px solid var(--chrome-border); border-bottom: 0; margin-bottom: -1px; }
+.pv-tabs .on::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--signature); }
+.pv-work { padding: 12px; }
+.pv-page { background: #fff; color: #171717; padding: 16px; box-shadow: 0 1px 2px rgba(0, 0, 0, .06); }
+.pv-title { color: #1f2fd8; font-size: 20px; line-height: 24px; margin-bottom: 12px; }
+.pv-cols { display: grid; gap: 12px; }
+.pv-side { display: none; }
+.pv-digits { display: grid; justify-items: center; gap: 4px; padding: 12px; border: 1px solid rgba(23, 23, 23, .16); }
+.pv-digits small { font-size: 12px; color: #525252; }
+.pv-digits b { font-size: 28px; line-height: 1; font-weight: 500; font-variant-numeric: tabular-nums; }
+.pv-digits b span { font-size: 13px; font-weight: 400; color: #525252; margin-left: 4px; }
+.pv-table { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+.pv-table th { background: #f4f4f5; color: #525252; font-weight: 500; padding: 4px 8px; text-align: right; }
+.pv-table td { padding: 4px 8px; text-align: right; border-bottom: 1px solid rgba(23, 23, 23, .07); }
+.pv-graph { min-width: 0; border: 1px solid rgba(23, 23, 23, .1); padding: 8px 8px 4px; }
+.pv-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: #525252; }
+.pv-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.pv-legend i { width: 12px; height: 2px; border-radius: 1px; }
+.pv-chart { display: block; width: 100%; height: auto; margin-top: 4px; }
+.pv-grid path { stroke: #ececee; stroke-width: 1; }
+.pv-axis { fill: none; stroke: #a1a1a6; stroke-width: 1; }
+.pv-lines polyline { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.pv-ticks text { font: 10px ui-monospace, Menlo, Consolas, monospace; fill: #737373; }
+.pv-ticks.x text { text-anchor: middle; }
+.pv-ticks.y text { text-anchor: end; }
+.pv-fit { margin-top: 4px; padding: 4px 8px; border-left: 3px solid #1a9c3e; background: #f7faf8; font-size: 12px; color: #171717; font-variant-numeric: tabular-nums; }
+
+.tips { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.tips li { display: grid; align-content: start; gap: 4px; padding-top: 12px; border-top: 1px solid var(--chrome-border); font-size: 14px; }
+.tips b { font-weight: 500; color: var(--chrome-text); }
+.tips span { color: var(--text-2); }
+
+@media (min-width: 900px) {
+  .welcome { min-height: calc(100vh - var(--appbar-h)); align-content: center; padding-top: 48px; padding-bottom: 48px; gap: 48px; }
+  .hero { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; }
+  .hero-text h2 { font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; }
+  .hero-sub { font-size: 18px; line-height: 28px; }
+  .pv-cols { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+  .pv-side { display: block; }
+  .tips { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+}
 .error-box { background: var(--danger-soft); color: var(--danger); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
 
 .loading { display: grid; justify-items: center; gap: 12px; padding: 80px 0; color: var(--text-2); font-size: 14px; }
