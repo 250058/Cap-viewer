@@ -1,5 +1,5 @@
 /* Service worker: offline app shell + receives files shared to the installed app. */
-const VERSION = 'cap-viewer-v7';
+const VERSION = 'cap-viewer-v8';
 const SHELL = [
   './',
   './index.html',

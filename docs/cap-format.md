@@ -16,7 +16,8 @@ PASCO의 공식 문서가 아니므로, 다른 버전의 파일에서는 다를 
 ## 측정 데이터
 
 - 측정값마다 `<DataSource>` 아래에 런별 `<DataSet DataSetID="{런 ID}">`가 있고, 그 안의 `DataSegmentElement/DependentStorageElement`가 데이터 파일(`FileName`)과 개수(`DataCacheDataSize`)를 가리킵니다.
-- **센서 데이터** (`StorageType="0"`): **12바이트 레코드의 배열**입니다. `uint32 유효 플래그(1=유효)` + `float64 값` (리틀 엔디언). 파일은 미리 크게 잡혀 있어서 앞쪽 `DataCacheDataSize`개만 사용합니다.
+- **센서 데이터** (`StorageType="0"`): **12바이트 레코드의 배열**입니다. `uint32 플래그` + `float64 값` (리틀 엔디언). 플래그의 맨 아래 비트가 1이면 유효한 값입니다. 위쪽 비트가 함께 켜진 경우도 있습니다(예: 수동 기록(Keep) 파일의 한 점이 `0x00020001`). 그 뜻은 아직 모르지만 값은 정상이었습니다. 파일은 미리 크게 잡혀 있어서 앞쪽 `DataCacheDataSize`개만 사용합니다.
+- **독립 변수가 파일로 저장된 경우** (`IndependentStorageElement`에 `FileName`, `StorageType="0"`): 시간 대신 기록 시각 등이 같은 12바이트 형식으로 들어 있습니다. 수동 기록(Keep) 파일에서 나옵니다.
 - **표에 직접 입력한 값** (`StorageType="7"`): 레코드가 `uint32 형식(2=문자열, 0=빈칸)` + `uint32 바이트 수` + `UTF-16LE 문자열`입니다. 행 번호 기반이고(`IndependentStorageElement StorageType="4"`), 데이터 세트 이름(`DataSet Name`, 예: "Set")을 가집니다.
 - **시간 값**은 보통 저장되지 않고 `IndependentStorageElement StorageType="1"`의 `IntervalCacheStartValue + i × IntervalCacheInterval`로 계산합니다. (예: 속도는 위치의 미분값이라 0.05 s부터 시작)
 - 값은 측정값의 기본 단위(`BaseUnit`)로 저장됩니다.

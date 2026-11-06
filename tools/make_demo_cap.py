@@ -40,7 +40,10 @@ def gid(rng):
 def records(values):
     buf = bytearray(CAPACITY * 12)
     for i, v in enumerate(values):
-        struct.pack_into("<Id", buf, i * 12, 1, v)
+        # Capstone sometimes sets higher flag bits on valid samples (seen: 0x00020001); keep one
+        # such record so the viewer's tests cover it.
+        flag = 0x00020001 if i == len(values) - 1 else 1
+        struct.pack_into("<Id", buf, i * 12, flag, v)
     return bytes(buf)
 
 

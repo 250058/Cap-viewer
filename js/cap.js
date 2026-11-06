@@ -79,12 +79,14 @@
   function decodeSamples(bytes, count, warnings, label) {
     const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     const n = Math.min(count, Math.floor(bytes.length / 12));
+    // Bit 0 of the flag word marks a valid sample. Capstone sometimes sets higher bits too
+    // (e.g. 0x00020001 on a point kept in manual sampling), so only the low 16 bits must be 0 or 1.
     let ok = true;
-    for (let i = 0; i < n; i++) if (dv.getUint32(i * 12, true) > 1) { ok = false; break; }
+    for (let i = 0; i < n; i++) if ((dv.getUint32(i * 12, true) & 0xffff) > 1) { ok = false; break; }
     if (ok) {
       if (n < count) warnings.push(label + ': 데이터 파일이 예상보다 작습니다.');
       const out = new Float64Array(n);
-      for (let i = 0; i < n; i++) out[i] = dv.getUint32(i * 12, true) ? dv.getFloat64(i * 12 + 4, true) : NaN;
+      for (let i = 0; i < n; i++) out[i] = dv.getUint32(i * 12, true) & 1 ? dv.getFloat64(i * 12 + 4, true) : NaN;
       return out;
     }
     if (bytes.length >= count * 8) {
