@@ -164,33 +164,34 @@
     return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
   }
 
+  // Line icons drawn after Lucide (lucide.dev, ISC license): one set, 18px, 1.5 stroke, text colour.
   const ICONS = {
-    fit: '<path d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/>',
-    runs: '<path d="M3 6h12v2H3V6zm0 5h18v2H3v-2zm0 5h9v2H3v-2z"/><circle cx="19" cy="7" r="2"/><circle cx="16" cy="17" r="2"/>',
-    range: '<path d="M3 5h2v14H3V5zm16 0h2v14h-2V5zM7 9h10v6H7V9z" opacity=".9"/>',
-    sigma: '<path d="M6 4h12v3h-2V6H9.4l5 6-5 6H16v-1h2v3H6v-1.6L11.8 12 6 5.6V4z"/>',
-    fx: '<path d="M10.5 4c-1.9 0-2.9 1.2-3.2 3l-.3 2H5v2h1.7l-1 5.5c-.2 1-.6 1.5-1.4 1.5H4v2h.5c1.9 0 2.9-1.2 3.2-3l1-6H11V9H9l.3-1.6c.2-1 .6-1.4 1.3-1.4h.6V4h-.7zM13 9l2.2 3.5L13 16h2.2l1.2-2.1 1.2 2.1H20l-2.2-3.5L20 9h-2.2l-1.2 2-1.2-2H13z"/>',
-    points: '<circle cx="6" cy="16" r="2.4"/><circle cx="12" cy="9" r="2.4"/><circle cx="18" cy="13" r="2.4"/>',
-    image: '<path d="M12 3v10.6l3.3-3.3 1.4 1.4L11 17.4l-5.7-5.7 1.4-1.4 3.3 3.3V3h2zM4 19h14v2H4v-2z"/>',
-    expand: '<path d="M4 4h7v2H7.4l4.3 4.3-1.4 1.4L6 7.4V11H4V4zm16 16h-7v-2h3.6l-4.3-4.3 1.4-1.4 4.3 4.3V13h2v7z"/>',
-    collapse: '<path d="M11 13v7H9v-3.6l-4.3 4.3-1.4-1.4L7.6 15H4v-2h7zm2-2V4h2v3.6l4.3-4.3 1.4 1.4L16.4 9H20v2h-7z"/>',
-    csv: '<path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 12v2h8v-2H8zm0 4v2h8v-2H8z"/>',
-    summary: '<path d="M4 4h16v4H4V4zm0 6h16v4H4v-4zm0 6h16v4H4v-4z"/>',
-    table: '<path d="M3 4h18v16H3V4zm2 2v3h4V6H5zm6 0v3h8V6h-8zM5 11v3h4v-3H5zm6 0v3h8v-3h-8zm-6 5v2h4v-2H5zm6 0v2h8v-2h-8z"/>',
-    prev: '<path d="M15.4 6.4 14 5l-7 7 7 7 1.4-1.4L9.8 12z"/>',
-    next: '<path d="M8.6 6.4 10 5l7 7-7 7-1.4-1.4 5.6-5.6z"/>',
-    layout: '<path d="M3 4h18v16H3V4zm2 2v12h6V6H5zm8 0v5h6V6h-6zm0 7v5h6v-5h-6z"/>',
-    reflow: '<path d="M5 3h14v4H5V3zm0 6h14v4H5V9zm0 6h14v6H5v-6z"/>',
-    open: '<path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/>',
-    close: '<path d="M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19l5.6-5.6 5.6 5.6 1.4-1.4-5.6-5.6L19 6.4 17.6 5 12 10.6z"/>',
-    zoomIn: '<path d="M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm-1 2h2v2h2v2h-2v2H9v-2H7V9h2V7z"/>',
-    zoomOut: '<path d="M10 3a7 7 0 0 1 5.6 11.2l5.1 5.1-1.4 1.4-5.1-5.1A7 7 0 1 1 10 3zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM7 9h6v2H7V9z"/>',
-    pdf: '<path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8.5 13v5H10v-1.6h.8a1.7 1.7 0 0 0 0-3.4H8.5zm1.5 1.2h.7a.5.5 0 0 1 0 1H10v-1zm3-1.2v5h1.6a2.5 2.5 0 0 0 0-5H13zm1.5 1.2h.1a1.3 1.3 0 0 1 0 2.6h-.1v-2.6zM17.5 13v5H19v-2h1.4v-1.2H19v-.6h1.6V13h-3.1z"/>',
-    info: '<path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1 8v7h2v-7h-2zm0-3v2h2V7h-2z"/>',
+    fit: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/>',
+    runs: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+    range: '<path d="M4 5v14"/><path d="M20 5v14"/><path d="M8 12h8"/><path d="m10 9-3 3 3 3"/><path d="m14 9 3 3-3 3"/>',
+    sigma: '<path d="M18 7V5a1 1 0 0 0-1-1H6.5a.5.5 0 0 0-.4.8l4.5 6a2 2 0 0 1 0 2.4l-4.5 6a.5.5 0 0 0 .4.8H17a1 1 0 0 0 1-1v-2"/>',
+    fx: '<circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><path d="M5 17A12 12 0 0 1 17 5"/>',
+    points: '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><circle cx="8" cy="15" r="1"/><circle cx="12" cy="10" r="1"/><circle cx="16" cy="13" r="1"/><circle cx="19" cy="7" r="1"/>',
+    image: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+    expand: '<path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/>',
+    collapse: '<path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="M14 10l7-7"/><path d="M3 21l7-7"/>',
+    csv: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/>',
+    summary: '<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>',
+    table: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M12 3v18"/>',
+    prev: '<path d="m15 18-6-6 6-6"/>',
+    next: '<path d="m9 18 6-6-6-6"/>',
+    layout: '<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/>',
+    reflow: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
+    open: '<path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/>',
+    close: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    zoomIn: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/>',
+    zoomOut: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M8 11h6"/>',
+    pdf: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="m9 15 3 3 3-3"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
   };
-  function icon(name, size) {
-    const s = size || 18;
-    return '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" aria-hidden="true" fill="currentColor">' + (ICONS[name] || '') + '</svg>';
+  /** One icon set at one size (18px, stroke 1.5). The size argument is kept for old callers but ignored. */
+  function icon(name) {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name] || '') + '</svg>';
   }
 
   global.CapUtil = { esc, el, fmt, fmtFixed, columnDecimals, computeStats, slopeUnit, measLabel, fmtDate, fmtBytes, safeFile, saveBlob, csvCell, icon };

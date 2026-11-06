@@ -554,12 +554,12 @@
     pdfJob.cancel = false;
     pdfJob.blob = null;
     pdfView('progress');
-    $('#pdf-bar').style.width = '0%';
+    $('#pdf-bar').style.transform = 'scaleX(0)';
     $('#pdf-status').textContent = 'PDF 변환 준비 중…';
     try {
       const blob = await makePdf(opts, (k, n, name) => {
         $('#pdf-status').textContent = k < n ? k + 1 + ' / ' + n + ' 페이지 변환 중… ' + name : 'PDF 파일 만드는 중…';
-        $('#pdf-bar').style.width = Math.round((k / n) * 100) + '%';
+        $('#pdf-bar').style.transform = 'scaleX(' + (k / n) + ')';
       });
       pdfJob.blob = blob;
       pdfJob.name = U.safeFile(baseName() + (opts.range === 'current' ? '_' + state.cap.pages[state.page].name : '')) + '.pdf';
@@ -637,11 +637,11 @@
     const prev = state.cap;
     showView('loading');
     $('#loading-text').textContent = '여는 중…';
-    $('#progress-bar').style.width = '0%';
+    $('#progress-bar').style.transform = 'scaleX(0)';
     try {
       const cap = await P.parseCap(file, (msg, p) => {
         $('#loading-text').textContent = msg;
-        $('#progress-bar').style.width = Math.round(p * 100) + '%';
+        $('#progress-bar').style.transform = 'scaleX(' + Math.min(1, Math.max(0, p)) + ')';
       });
       if (!cap.pages.length) {
         if (!cap.runs.length) throw new Error('이 파일에는 페이지도 측정 데이터도 없습니다.');
