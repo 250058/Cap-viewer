@@ -1,6 +1,5 @@
 /* CAP 뷰어 — quiet graphite chrome around a white Capstone workbook page.
-   Spacing on a 4px grid; type scale 12/13/14/15/18 (+40 for digits); weights 400/500, 600 for titles.
-   Design pass guided by unslop by Damir Sokolovsky (@heydamir), CC BY 4.0. */
+   Spacing on a 4px grid; type scale 12/13/14/15/18 (+40 for digits); weights 400/500, 600 for titles. */
 :root {
   --chrome: #f4f4f5;        /* raised: tab strip, fields, sections */
   --chrome-2: #e9e9eb;      /* pressed / segmented track */
