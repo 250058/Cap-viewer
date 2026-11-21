@@ -10,9 +10,12 @@
   --text-2: #525252;
   --muted: #6b6b70;
   --workspace: #e4e4e7;     /* around the page */
-  --accent: #1f5fd1;
-  --accent-contrast: #ffffff;
-  --accent-soft: #e8effc;
+  /* colours from the app icon: graphite body, pale stones, gold keystone */
+  --accent: #2a2a2e;        /* primary button fill = icon background */
+  --accent-hover: #3a3a3f;
+  --accent-contrast: #fafafa;
+  --accent-ink: #8a6400;    /* gold that reads as text on light surfaces (5.4:1) */
+  --accent-soft: #fbf2dc;
   --signature: #f2b632;     /* the yellow data point from the icon: "you are here" */
   --danger: #b42318;
   --danger-soft: #fdecea;
@@ -40,9 +43,11 @@
     --text-2: #a1a1a6;
     --muted: #8e8e94;
     --workspace: #141415;
-    --accent: #7ea3ff;
-    --accent-contrast: #0b1020;
-    --accent-soft: #1d2741;
+    --accent: #e8e8ea;      /* primary button fill = icon stones */
+    --accent-hover: #d4d4d8;
+    --accent-contrast: #1b1b1e;
+    --accent-ink: #f2b632;  /* the keystone gold itself (9.6:1 on the bars) */
+    --accent-soft: #3a3121;
     --signature: #ffd166;
     --danger: #ff8a80;
     --danger-soft: #3a1d1b;
@@ -88,7 +93,7 @@ svg { flex: none; }
   transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease), transform 150ms var(--ease);
 }
 .btn:active, .tb:active, .pg:active:not(:disabled), .ctl:active, .chip-btn:active, .icon-btn:active { transform: scale(.98); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
 
 /* ---------- title bar ---------- */
 .appbar {
@@ -123,11 +128,11 @@ svg { flex: none; }
 }
 .btn:hover { background: var(--chrome); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-contrast); }
-.btn.primary:hover { background: color-mix(in srgb, var(--accent) 90%, #000); }
+.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 .btn.ghost { background: transparent; }
 .btn.ghost:hover { background: var(--chrome); }
 .btn.big { min-height: 48px; padding: 0 20px; font-size: 15px; }
-.link-btn { background: none; border: 0; padding: 4px 0; color: var(--accent); font-size: 14px; font-weight: 500; cursor: pointer; }
+.link-btn { background: none; border: 0; padding: 4px 0; color: var(--accent-ink); font-size: 14px; font-weight: 500; cursor: pointer; }
 .icon-btn {
   display: inline-grid; place-items: center;
   width: 40px; height: 40px;
@@ -261,10 +266,10 @@ main { min-height: 50vh; }
 .error-box { background: var(--danger-soft); color: var(--danger); border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 500; overflow-wrap: anywhere; }
 
 .loading { display: grid; justify-items: center; gap: 12px; padding: 80px 0; color: var(--text-2); font-size: 14px; }
-.spinner { width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--chrome-2); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+.spinner { width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--chrome-2); border-top-color: var(--accent-ink); animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .progress { width: min(320px, 80%); height: 4px; border-radius: 2px; background: var(--chrome-2); overflow: hidden; }
-#progress-bar, #pdf-bar { height: 100%; width: 100%; background: var(--accent); transform: scaleX(0); transform-origin: 0 50%; transition: transform 160ms var(--ease); }
+#progress-bar, #pdf-bar { height: 100%; width: 100%; background: var(--accent-ink); transform: scaleX(0); transform-origin: 0 50%; transition: transform 160ms var(--ease); }
 
 /* ---------- workbook page ---------- */
 .page-host { padding: 12px max(8px, env(safe-area-inset-right)) 16px max(8px, env(safe-area-inset-left)); }
@@ -276,8 +281,8 @@ main { min-height: 50vh; }
   --chart-grid: #ececee;
   --chart-axis: #a1a1a6;
   --chart-text: #525252;
-  --chart-sel: rgba(31, 95, 209, .1);
-  --chart-sel-edge: rgba(31, 95, 209, .6);
+  --chart-sel: rgba(242, 182, 50, .16);
+  --chart-sel-edge: rgba(138, 100, 0, .7);
   --tbl-bg: #ffffff;
   --tbl-head: #f4f4f5;
   --tbl-idx: #fafafa;
@@ -377,7 +382,7 @@ main { min-height: 50vh; }
   cursor: pointer;
 }
 .tb:hover { background: #f0f0f1; color: #171717; }
-.tb[aria-pressed="true"] { background: #e8effc; border-color: rgba(31, 95, 209, .3); color: #1f5fd1; }
+.tb[aria-pressed="true"] { background: #fbf2dc; border-color: rgba(138, 100, 0, .3); color: #8a6400; }
 .tb-fit { position: relative; padding-right: 4px; }
 .tb-select {
   border: 0; background: transparent; font-size: 13px; font-weight: 500; color: inherit;
@@ -466,8 +471,8 @@ main { min-height: 50vh; }
 .run-row th { height: 32px; padding: 0 8px; }
 .run-sel { border: 0; background: transparent; font-weight: 500; font-size: 12px; max-width: 120px; color: var(--tbl-text); cursor: pointer; }
 .run-row .dot { margin-right: 4px; }
-.more-btn { display: block; width: 100%; padding: 8px; min-height: 40px; border: 0; border-top: 1px solid var(--tbl-line); background: var(--tbl-idx); color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; }
-.paper .more-btn { color: #1f5fd1; }
+.more-btn { display: block; width: 100%; padding: 8px; min-height: 40px; border: 0; border-top: 1px solid var(--tbl-line); background: var(--tbl-idx); color: var(--accent-ink); font-size: 13px; font-weight: 500; cursor: pointer; }
+.paper .more-btn { color: #8a6400; }
 .more-btn:hover { background: var(--tbl-head); }
 
 /* digits */
@@ -582,7 +587,7 @@ main { min-height: 50vh; }
 .meas-group ul { list-style: none; padding: 4px 0 0 16px; }
 .meas-group li { padding: 2px 0; }
 .meas-group .dot { margin-right: 8px; }
-.tag { display: inline-block; padding: 0 4px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 500; }
+.tag { display: inline-block; padding: 0 4px; border-radius: 4px; background: var(--accent-soft); color: var(--accent-ink); font-size: 12px; font-weight: 500; }
 .warn { color: var(--danger); }
 
 .field {
@@ -607,7 +612,7 @@ main { min-height: 50vh; }
 .sheet-actions { display: flex; justify-content: space-between; margin: 4px 0; }
 .run-list { list-style: none; margin: 0; padding: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .run-item label { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 4px; border-bottom: 1px solid var(--chrome-border); cursor: pointer; }
-.run-item input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+.run-item input { width: 20px; height: 20px; accent-color: var(--accent-ink); flex: none; }
 .run-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .run-name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .run-meta { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -617,7 +622,7 @@ main { min-height: 50vh; }
 .opt-group { border: 1px solid var(--chrome-border); border-radius: 12px; margin: 0 0 12px; padding: 8px 12px; }
 .opt-group legend { font-size: 12px; font-weight: 500; color: var(--muted); padding: 0 4px; }
 .opt { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 4px 0; cursor: pointer; font-size: 14px; }
-.opt input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+.opt input { width: 20px; height: 20px; accent-color: var(--accent-ink); flex: none; }
 .opt small { color: var(--muted); font-size: 12px; }
 .btn.wide { width: 100%; margin-top: 4px; }
 .pdf-progress, .pdf-done { display: grid; justify-items: center; gap: 12px; padding: 24px 0 12px; text-align: center; font-size: 14px; }
@@ -650,9 +655,9 @@ main { min-height: 50vh; }
 .drop-overlay {
   position: fixed; inset: 12px; z-index: 95;
   display: grid; place-items: center;
-  border: 2px dashed var(--accent); border-radius: 16px;
+  border: 2px dashed var(--accent-ink); border-radius: 16px;
   background: color-mix(in srgb, var(--accent-soft) 88%, transparent);
-  color: var(--accent); font-size: 18px; font-weight: 500;
+  color: var(--accent-ink); font-size: 18px; font-weight: 500;
   pointer-events: none;
 }
 .toast {
