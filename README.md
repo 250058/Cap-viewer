@@ -149,26 +149,26 @@ PDF는 화면을 그대로 담은 이미지로 만들어서 글자를 선택할 
 ## 아이콘
 
 <p>
-  <img src="icons/icon.svg" width="64" alt="앱 아이콘">
-  <img src="icons/favicon.svg" width="64" alt="작은 크기용 아이콘">
+  <img src="icons/icon.svg" width="96" alt="CAP 뷰어 아이콘: 금색 쐐기돌이 꼭대기에 박힌 아치">
 </p>
 
-파일 확장자에서 따온 **`.cap`** 소문자를 원과 직선만으로 그린 전용 모노라인 글자입니다.
-글꼴 없이 도형으로 그려서 어느 기기에서나 똑같이 보이고, 노란 점은 마침표이자 그래프의 데이터 점입니다.
-16~32px처럼 작은 곳(브라우저 탭)에서는 같은 규칙으로 그린 **`.c`** 를 씁니다.
+**아치의 쐐기돌(capstone)** 을 그린 아이콘입니다. 캡스톤은 아치 꼭대기에서 양쪽 돌을 잠가 아치를 완성하는 돌이고, 이 앱이 여는 PASCO **Capstone** 파일의 이름이기도 합니다.
+진한 회색 바탕에 밝은 돌들을 놓고 꼭대기의 쐐기돌 하나만 금색으로 칠했습니다. 금색은 앱 안에서 "지금 보는 페이지"를 표시하는 점과 같은 색입니다.
+
+[icon-designer-skills](https://github.com/Paldom/icon-designer-skills)(Paldom, MIT)의 기획 → 그리기 → 검사·평가 → 내보내기 순서로 만들었습니다. 기획서, 후보, 최종 원본이 [`icon-design/`](icon-design/)에 있습니다.
 
 | 파일 | 용도 |
 | --- | --- |
-| `icons/icon.svg` | 원본 (앱 아이콘) |
+| `icons/icon.svg` | 원본 (= `icon-design/icon.svg`, 둥근 스쿼클 배경) |
 | `icons/favicon.svg`, `favicon-32.png` | 브라우저 탭 |
 | `icons/icon-192.png`, `icon-512.png` | 설치 아이콘 |
-| `icons/icon-maskable-512.png` | Android 적응형 아이콘 (가장자리까지 채운 배경) |
+| `icons/icon-maskable-512.png` | Android 적응형 아이콘 (가장자리까지 채운 네모 배경) |
 | `icons/icon-monochrome-512.png` | 단색 아이콘 |
-| `icons/apple-touch-icon.png` | iPhone·iPad 홈 화면 |
+| `icons/apple-touch-icon.png` | iPhone·iPad 홈 화면 (네모, iOS가 모서리를 둥글게 깎음) |
 | `icons/og-image.png` | 링크 미리보기 (카카오톡·메신저·SNS) |
 
-색: 배경 `#2f6bff` → `#1739a8` 그라데이션, 글자 `#ffffff`, 점 `#ffd166`.
-PNG는 `node tools/render-icons.mjs`로 SVG에서 다시 만들 수 있습니다.
+색: 바탕 `#2A2A2E`, 돌 `#E8E8EA`, 쐐기돌 `#F2B632`.
+PNG는 `node tools/render-icons.mjs`로 원본 SVG에서 다시 만들 수 있습니다.
 
 ## 개발자용
 
