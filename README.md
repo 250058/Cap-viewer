@@ -4,7 +4,7 @@
 
 PASCO Capstone 실험 파일(`.cap`)을 휴대폰 브라우저에서 여는 웹앱입니다. 페이지, 설명문, 그래프, 표를 Capstone 화면처럼 보고 PDF와 CSV로 저장합니다. 설치가 필요 없고, 파일은 기기 밖으로 나가지 않습니다.
 
-[앱 열기](https://cap.dshs.dev) · [홈 화면에 설치](#휴대폰에-설치하기) · [자주 묻는 질문](#자주-묻는-질문) · [직접 배포하기](#직접-배포하기)
+[앱 열기](https://cap.dshs.dev) · [홈 화면에 설치](#휴대폰에-설치하기) · [자주 묻는 질문](#자주-묻는-질문) · [개발자용](#개발자용)
 
 <p>
   <img src="docs/screenshots/phone-start.png" width="200" alt="시작 화면">
@@ -13,7 +13,7 @@ PASCO Capstone 실험 파일(`.cap`)을 휴대폰 브라우저에서 여는 웹�
   <img src="docs/screenshots/phone-pdf.png" width="200" alt="PDF로 저장">
 </p>
 
-실험실 컴퓨터에서 저장한 `.cap` 파일은 Capstone이 없으면 열 수 없습니다. CAP 뷰어는 그 파일을 휴대폰에서 열어 페이지를 넘겨 보고, 그래프를 분석하고, 보고서용 PDF와 CSV로 저장하게 해 줍니다.
+실험실 컴퓨터에서 저장한 `.cap` 파일은 Capstone이 설치된 컴퓨터에서만 열립니다. CAP 뷰어가 있으면 집이나 이동 중에도 휴대폰으로 실험 내용을 다시 보고 보고서를 준비할 수 있습니다.
 
 - **설치 없음**: 주소만 열면 되고, 홈 화면에 추가하면 앱처럼 인터넷 없이도 실행
 - **파일은 기기 안에서만**: 서버로 올리지 않음, 로그인과 광고 없음
@@ -111,7 +111,7 @@ PASCO Capstone 실험 파일(`.cap`)을 휴대폰 브라우저에서 여는 웹�
 Capstone에서 저장한 `.cap` 파일이 아니거나, 전송 중에 파일이 손상된 경우입니다. 원본 파일을 다시 받아 보세요.
 
 **그래프·표에 단위가 비어 있어요. / 계산값이 안 보여요.**
-아직 확인하지 못한 단위 코드이거나 지원하지 않는 함수가 들어간 계산식입니다. 저장소 이슈에 파일을 올려 주시면 지원을 추가할 수 있습니다.
+아직 확인하지 못한 단위 코드이거나 지원하지 않는 함수가 들어간 계산식입니다. 저장소 이슈에 어떤 센서와 측정값인지 적어 주시면 지원을 추가할 수 있습니다. 이슈는 누구나 볼 수 있으니, 파일을 함께 올릴 때는 이름이나 답안 같은 개인 정보가 없는 파일만 올려 주세요.
 
 **PDF 글자를 선택·검색할 수 없어요.**
 PDF는 화면을 그대로 담은 이미지로 만들어서 글자를 선택할 수 없습니다. 데이터가 필요하면 CSV 저장을 이용하세요.
@@ -119,7 +119,48 @@ PDF는 화면을 그대로 담은 이미지로 만들어서 글자를 선택할 
 **업데이트한 내용이 안 보여요.**
 오프라인용 캐시 때문입니다. 새 버전은 열 때 뒤에서 받아 두었다가 그다음 실행부터 적용됩니다. 앱(탭)을 닫았다가 다시 열어 보세요 (필요하면 한 번 더).
 
-## 직접 배포하기
+## 개발자용
+
+### 파일 구성
+
+```
+index.html              화면
+css/style.css           스타일 (Capstone 스타일 틀, 라이트/다크)
+js/zip.js               ZIP 읽기 + inflate (DecompressionStream, 없으면 순수 JS)
+js/cap.js               .cap 해석 (main.xml, 데이터, 입력값, 계산식, 워크북 페이지)
+js/richtext.js          Capstone(Qt) 서식 텍스트를 안전한 HTML로 (허용 목록 방식)
+js/util.js              숫자 형식, 통계/맞춤, 아이콘
+js/chart.js             터치 제스처를 지원하는 캔버스 그래프
+js/widgets.js           페이지 디스플레이: 텍스트, 답 입력란, 그림, 그래프, 표, 숫자
+js/pdf.js               PDF 작성 (페이지 이미지 + 책갈피, 의존성 없음)
+js/app.js               화면 틀: 페이지 탭, 보기 방식, 데이터 요약, 런 선택, CSV, PDF
+sw.js                   오프라인 캐시 + Android 공유 받기
+manifest.webmanifest    앱 설치 정보
+vendor/                 html2canvas 1.4.1 (페이지 → 이미지, MIT, 원본 그대로)
+examples/demo.cap       예제 파일 (합성 데이터)
+docs/cap-format.md      .cap 파일 구조 분석 메모
+tools/                  예제 파일·아이콘 생성 스크립트
+tests/e2e.mjs           헤드리스 Chromium 종단 테스트
+```
+
+### 실행과 테스트
+
+```bash
+# 로컬에서 실행 (서비스 워커 때문에 file:// 대신 서버로)
+python3 -m http.server 8000          # → http://localhost:8000
+
+# 테스트 (Playwright 필요: npm i -D playwright && npx playwright install chromium)
+node tests/e2e.mjs                   # 예제 파일로 전체 기능 검사 (PDF 포함)
+node tests/e2e.mjs 내파일.cap         # 내 파일의 모든 페이지를 휴대폰·PC 폭으로 열어 검사
+
+# 예제 파일 / 아이콘 다시 만들기
+python3 tools/make_demo_cap.py examples/demo.cap
+node tools/render-icons.mjs
+```
+
+`.cap` 파일 형식은 [docs/cap-format.md](docs/cap-format.md)에 정리해 두었습니다.
+
+### 직접 배포하기
 
 빌드 과정이 없는 정적 웹앱이라 저장소를 그대로 올리면 됩니다. 이 저장소는 GitHub Pages에 사용자 도메인 `cap.dshs.dev`(`CNAME` 파일)로 배포합니다.
 
@@ -134,7 +175,7 @@ PDF는 화면을 그대로 담은 이미지로 만들어서 글자를 선택할 
 - 다른 주소로 배포하면 `CNAME`을 지우거나 바꾸고, `index.html`의 `og:image`(링크 미리보기 이미지) 주소와 이 README의 앱 링크도 바꿉니다.
 - 앱 파일을 고친 뒤 다시 배포할 때는 `sw.js`의 `VERSION` 값을 올려야 사용자 기기의 캐시가 새 버전으로 바뀝니다.
 
-## 아이콘
+### 아이콘
 
 <p>
   <img src="icons/icon.svg" width="96" alt="CAP 뷰어 아이콘: 금색 쐐기돌이 꼭대기에 박힌 아치">
@@ -157,43 +198,6 @@ PDF는 화면을 그대로 담은 이미지로 만들어서 글자를 선택할 
 
 색: 바탕 `#2A2A2E`, 돌 `#E8E8EA`, 쐐기돌 `#F2B632`.
 PNG는 `node tools/render-icons.mjs`로 원본 SVG에서 다시 만들 수 있습니다.
-
-## 개발자용
-
-```
-index.html              화면
-css/style.css           스타일 (Capstone 스타일 틀, 라이트/다크)
-js/zip.js               ZIP 읽기 + inflate (DecompressionStream, 없으면 순수 JS)
-js/cap.js               .cap 해석 (main.xml, 데이터, 입력값, 계산식, 워크북 페이지)
-js/richtext.js          Capstone(Qt) 서식 텍스트를 안전한 HTML로 (허용 목록 방식)
-js/util.js              숫자 형식, 통계/맞춤, 아이콘
-js/chart.js             터치 제스처를 지원하는 캔버스 그래프
-js/widgets.js           페이지 디스플레이: 텍스트, 답 입력란, 그림, 그래프, 표, 숫자
-js/pdf.js               PDF 작성 (페이지 이미지 + 책갈피, 의존성 없음)
-js/app.js               화면 틀: 페이지 탭, 보기 방식, 데이터 요약, 런 선택, CSV, PDF
-sw.js                   오프라인 캐시 + Android 공유 받기
-manifest.webmanifest    앱 설치 정보
-vendor/                 html2canvas 1.4.1 (페이지 → 이미지, MIT, 원본 그대로)
-examples/demo.cap       예제 파일 (합성 데이터)
-docs/cap-format.md      .cap 파일 구조 분석 메모
-tools/                  예제 파일·아이콘 생성 스크립트
-tests/e2e.mjs           헤드리스 Chromium 종단 테스트
-```
-
-```bash
-# 로컬에서 실행 (서비스 워커 때문에 file:// 대신 서버로)
-python3 -m http.server 8000          # → http://localhost:8000
-
-# 테스트 (Playwright 필요: npm i -D playwright && npx playwright install chromium)
-node tests/e2e.mjs                   # 예제 파일로 전체 기능 검사 (PDF 포함)
-node tests/e2e.mjs 내파일.cap         # 내 파일의 모든 페이지를 휴대폰·PC 폭으로 열어 검사
-
-# 예제 파일 / 아이콘 다시 만들기
-python3 tools/make_demo_cap.py examples/demo.cap
-node tools/render-icons.mjs
-```
-
-`.cap` 파일 형식은 [docs/cap-format.md](docs/cap-format.md)에 정리해 두었습니다.
 
 ## 라이선스
 
